@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<!-- saved from url=(0234)file:///Users/rgrandy/Library/Application%20Support/Claude/local-agent-mode-sessions/3a8e7064-0bd3-4fde-a5b7-696e928c3036/ae6cdefa-a29d-44f9-af49-72d85aede8c8/local_2f742189-2b39-4714-a318-64b1cf28ab46/outputs/WDC_Field_Collector.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WDC Field">
+<title>WDC Field Specimen Collector</title>
+<style>
+:root{
+  --primary:#4A3728;--primary-lt:#7D5A47;--accent:#6D8B74;
+  --bg:#F5F1EC;--card:#fff;--text:#2C1810;--muted:#8B7355;--border:#DDD0C5;
+  --input-bg:#F9F6F3;--danger:#C0392B;--success:#27AE60;--warn:#E67E22;
+  --r:12px;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif;
+  background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+
+/* ── HEADER ── */
+#header{background:var(--primary);color:#fff;padding:calc(var(--safe-t)+8px) 16px 10px;
+  display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+#header .logo{font-size:24px;line-height:1;flex-shrink:0}
+#header-text{flex:1;min-width:0}
+#header h1{font-size:16px;font-weight:700;line-height:1}
+#header-site{font-size:12px;opacity:.75;margin-top:1px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:11px;padding:3px 8px;border-radius:10px;font-weight:700;flex-shrink:0}
+.badge.online{background:rgba(39,174,96,.25);color:#2ECC71}
+.badge.offline{background:rgba(192,57,43,.25);color:#E74C3C}
+
+/* ── CONTENT ── */
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.view{display:none}
+.view.active{display:block}
+
+/* ── BOTTOM NAV ── */
+#nav{background:#fff;border-top:1px solid var(--border);display:flex;
+  padding-bottom:var(--safe-b);flex-shrink:0;z-index:10}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:8px 2px 6px;gap:2px;border:none;background:none;cursor:pointer;
+  color:var(--muted);font-size:10px;font-weight:600;transition:color .15s;position:relative}
+.nav-btn.active{color:var(--primary)}
+.nav-btn svg{width:22px;height:22px}
+.nav-btn.disabled{opacity:.35;pointer-events:none}
+.nav-badge{position:absolute;top:4px;right:calc(50% - 18px);background:var(--danger);
+  color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;padding:0 3px;font-weight:800}
+
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:var(--r);box-shadow:0 1px 5px rgba(0,0,0,.08);
+  overflow:hidden;margin-bottom:10px}
+.card-hd{background:var(--primary);color:#fff;padding:8px 14px;font-weight:700;font-size:13px}
+.card-bd{padding:12px 14px}
+
+/* ── SITE CARDS ── */
+.site-card{background:#fff;border-radius:var(--r);box-shadow:0 1px 5px rgba(0,0,0,.08);
+  margin-bottom:10px;overflow:hidden;cursor:pointer;
+  border:2px solid transparent;transition:border-color .15s}
+.site-card.active-site{border-color:var(--accent)}
+.site-card-body{padding:12px 14px;display:flex;align-items:center;gap:10px}
+.site-meta{flex:1;min-width:0}
+.site-name{font-weight:700;font-size:15px}
+.site-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.site-check{color:var(--accent);font-size:18px;font-weight:800;flex-shrink:0}
+.site-action-btn{background:none;border:none;font-size:15px;cursor:pointer;
+  padding:5px;color:var(--muted);flex-shrink:0;line-height:1}
+
+/* ── NEW SITE FORM ── */
+#new-site-panel{background:#fff;border-radius:var(--r);box-shadow:0 2px 12px rgba(0,0,0,.15);
+  margin-bottom:14px;overflow:hidden;display:none}
+#new-site-panel.open{display:block}
+
+/* ── ENTRY CARDS ── */
+.entry-card{background:#fff;border-radius:var(--r);box-shadow:0 1px 5px rgba(0,0,0,.08);
+  margin-bottom:9px;overflow:hidden;cursor:pointer;display:flex}
+.entry-accent{width:5px;flex-shrink:0}
+.entry-accent.synced{background:var(--success)}
+.entry-accent.pending{background:var(--warn)}
+.entry-accent.error{background:var(--danger)}
+.entry-body{flex:1;padding:11px 13px;display:flex;align-items:center;gap:11px;min-width:0}
+.entry-spec{font-size:19px;font-weight:800;color:var(--primary);min-width:34px;text-align:center}
+.entry-meta{flex:1;min-width:0}
+.entry-title{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.entry-sub{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sync-ic{width:18px;height:18px;flex-shrink:0}
+
+/* ── FORMS ── */
+.fg{margin-bottom:11px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 11px;border:1.5px solid var(--border);
+  border-radius:8px;background:var(--input-bg);font-size:16px;color:var(--text);
+  outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;font-family:inherit}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--primary-lt)}
+.fg textarea{resize:vertical;min-height:72px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fr4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.fr4 .fg,.fr-meas .fg{margin-bottom:0}
+.fr4 .fg label,.fr-meas .fg label{font-size:10px;letter-spacing:0;margin-bottom:4px}
+.fr4 .fg input,.fr4 .fg select,.fr-meas .fg input{padding:9px 5px;font-size:16px}
+.fr-meas{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+
+/* ── PILLS / TOGGLES ── */
+.pill-group{display:flex;flex-wrap:wrap;gap:6px}
+.pill{padding:7px 12px;border-radius:18px;border:1.5px solid var(--border);font-size:13px;
+  cursor:pointer;background:var(--input-bg);color:var(--text);font-weight:500;transition:all .15s}
+.pill.sel{background:var(--primary);border-color:var(--primary);color:#fff}
+.toggle-group{display:flex;gap:8px;flex-wrap:wrap}
+.toggle-btn{padding:9px 16px;border:1.5px solid var(--border);border-radius:9px;
+  background:var(--input-bg);font-size:14px;cursor:pointer;transition:all .15s;color:var(--text);font-weight:500}
+.toggle-btn.sel{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* ── BUTTONS ── */
+.btn{padding:11px 18px;border-radius:10px;border:none;font-size:15px;font-weight:600;
+  cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s;font-family:inherit}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-outline{background:#fff;border:1.5px solid var(--border);color:var(--text)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:8px 13px;font-size:13px;border-radius:8px}
+.btn-block{width:100%;justify-content:center}
+
+/* ── FORM STICKY HEADER ── */
+#form-bar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);
+  padding:10px 16px;display:flex;align-items:center;justify-content:space-between;
+  gap:10px;z-index:20;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+#form-bar-title{font-weight:700;font-size:15px;flex:1;text-align:center}
+#form-content{padding:14px 16px 30px}
+
+/* ── SECTION HEADERS ── */
+.sec-hd{font-size:17px;font-weight:800;color:var(--primary);
+  margin:14px 0 10px;display:flex;align-items:center;gap:9px}
+.sec-hd:first-child{margin-top:0}
+
+/* ── PHOTOS ── */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:7px;margin-top:8px}
+.photo-thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:pointer}
+.photo-add{aspect-ratio:1;border-radius:8px;border:2px dashed var(--border);background:var(--input-bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:11px;color:var(--muted);cursor:pointer;gap:4px;font-weight:600}
+#photo-input{display:none}
+
+/* ── RADIAL ── */
+.radial-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.radial-pt-hd{background:var(--primary);color:#fff;text-align:center;font-weight:700;
+  font-size:12px;padding:6px 4px;border-radius:6px 6px 0 0}
+.radial-pt-body{border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;
+  padding:6px 5px;display:flex;flex-direction:column;gap:5px;background:var(--input-bg)}
+.radial-row{display:flex;gap:3px;align-items:center}
+.radial-lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.2px;min-width:18px}
+.radial-row input{flex:1;padding:5px 3px;border:1px solid var(--border);border-radius:5px;
+  font-size:12px;text-align:center;background:#fff;outline:none;font-family:inherit;min-width:0}
+
+/* ── SEARCH ── */
+.search-bar{display:flex;align-items:center;background:#fff;border-radius:10px;
+  border:1.5px solid var(--border);padding:9px 13px;gap:9px;margin-bottom:12px}
+.search-bar input{flex:1;border:none;background:none;font-size:16px;color:var(--text);
+  outline:none;font-family:inherit}
+.search-bar svg{color:var(--muted);flex-shrink:0}
+
+/* ── SETTINGS ── */
+.sett-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:9px;margin-top:2px}
+.sett-card{background:#fff;border-radius:var(--r);overflow:hidden;
+  box-shadow:0 1px 5px rgba(0,0,0,.08);margin-bottom:4px}
+.sett-row{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:5px}
+.sett-row:last-child{border-bottom:none}
+.sett-row label{font-size:14px;font-weight:600}
+.sett-row input{width:100%;padding:9px 11px;border:1.5px solid var(--border);
+  border-radius:8px;font-size:15px;background:var(--input-bg);color:var(--text);
+  outline:none;font-family:inherit}
+.sett-row small{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* ── MISC ── */
+.help{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty svg{display:block;margin:0 auto 14px;opacity:.35}
+.empty h3{font-size:17px;color:var(--text);margin-bottom:7px;font-weight:700}
+.empty p{font-size:14px;line-height:1.6}
+.instr{background:rgba(109,139,116,.1);border:1.5px solid rgba(109,139,116,.3);
+  border-radius:9px;padding:11px 13px;font-size:13px;line-height:1.7}
+#toast{position:fixed;bottom:calc(60px + var(--safe-b) + 10px);left:50%;
+  transform:translateX(-50%) translateY(14px);background:rgba(44,24,16,.92);
+  color:#fff;padding:9px 18px;border-radius:100px;font-size:14px;font-weight:500;
+  opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:2000}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#photo-viewer{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:1500;
+  display:none;flex-direction:column;align-items:center;justify-content:center}
+#photo-viewer.open{display:flex}
+#photo-viewer img{max-width:100%;max-height:75vh;object-fit:contain;border-radius:6px}
+#pv-close{position:absolute;top:calc(var(--safe-t)+14px);right:16px;width:36px;height:36px;
+  border-radius:50%;background:rgba(255,255,255,.2);border:none;color:#fff;
+  font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pv-actions{display:flex;gap:10px;margin-top:14px}
+.pv-btn{padding:9px 17px;border:none;border-radius:18px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit}
+.status-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:9px}
+.status-chip.synced{background:rgba(39,174,96,.15);color:#1a7a42}
+.status-chip.pending{background:rgba(230,126,34,.15);color:#a05a12}
+.status-chip.error{background:rgba(192,57,43,.15);color:#c0392b}
+.status-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── HEADER ── -->
+  <div id="header">
+    <div class="logo">🦕</div>
+    <div id="header-text">
+      <h1>Wyoming Dinosaur Center - Field Collection</h1>
+      <div id="header-site">No dig site selected</div>
+    </div>
+    <div id="online-badge" class="badge online">● Online</div>
+  </div>
+
+  <!-- ── CONTENT ── -->
+  <div id="content">
+
+    <!-- SITES VIEW -->
+    <div class="view active" id="view-sites" style="padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="font-size:20px;font-weight:800">Dig Sites</div>
+        <button class="btn btn-accent btn-sm" onclick="toggleNewSitePanel()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          New Site
+        </button>
+      </div>
+
+      <!-- New site form -->
+      <div id="new-site-panel" class="">
+        <div class="card-hd" style="background:var(--accent);color:#fff;padding:10px 14px;font-weight:700">Create New Dig Site</div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
+          <div class="fg" style="margin-bottom:0"><label>Site Name *</label>
+            <input type="text" id="ns-name" placeholder="e.g., Quarry A, East Ridge, Layer 7"></div>
+          <div class="fg" style="margin-bottom:0"><label>Location / GPS</label>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="ns-location" placeholder="e.g., 43.8°N 108.4°W, Section B" style="flex:1">
+              <button class="btn btn-sm btn-outline" onclick="getGPS(&#39;ns-location&#39;)" style="flex-shrink:0;padding:9px 11px">📍 GPS</button>
+            </div></div>
+          <div class="fg" style="margin-bottom:0"><label>Notes</label>
+            <input type="text" id="ns-notes" placeholder="Formation, season, project…"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-accent btn-sm" onclick="createSite()" style="flex:1;justify-content:center">✓ Create Site</button>
+            <button class="btn btn-outline btn-sm" onclick="toggleNewSitePanel()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit site form -->
+      <div id="edit-site-panel" class="new-site-panel" style="display:none">
+        <div class="card-hd" style="background:var(--primary-lt);color:#fff;padding:10px 14px;font-weight:700">Edit Dig Site</div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
+          <div class="fg" style="margin-bottom:0"><label>Site Name *</label>
+            <input type="text" id="es-name" placeholder="Site name"></div>
+          <div class="fg" style="margin-bottom:0"><label>Location / GPS</label>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="es-location" placeholder="Coordinates or description" style="flex:1">
+              <button class="btn btn-sm btn-outline" onclick="getGPS(&#39;es-location&#39;)" style="flex-shrink:0;padding:9px 11px">📍 GPS</button>
+            </div></div>
+          <div class="fg" style="margin-bottom:0"><label>Notes</label>
+            <input type="text" id="es-notes" placeholder="Formation, season, project…"></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="saveEditSite()" style="flex:1;justify-content:center">✓ Save Changes</button>
+            <button class="btn btn-outline btn-sm" onclick="closeEditSite()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="sites-list"><div class="empty">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+      <h3>No dig sites yet</h3>
+      <p>Create your first site to start collecting specimens</p>
+    </div></div>
+    </div>
+
+    <!-- ENTRIES VIEW -->
+    <div class="view" id="view-entries" style="padding:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div id="sync-summary"></div>
+        <div style="display:flex;gap:7px;align-items:center">
+          <button class="btn btn-sm btn-outline" id="sync-all-btn" onclick="syncAll()" style="display:none">🔄</button>
+          <button class="btn btn-sm btn-outline" onclick="exportCSV()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            CSV
+          </button>
+          <button class="btn btn-sm btn-accent" onclick="newEntry()">+ New Entry</button>
+        </div>
+      </div>
+      <div class="search-bar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="search" id="search-input" placeholder="Search by specimen, element, taxon…" oninput="renderEntries()">
+      </div>
+      <div id="entries-list"><div class="empty"><p>Select a dig site to see its entries</p></div></div>
+    </div>
+
+    <!-- FORM VIEW -->
+    <div class="view" id="view-form">
+      <div id="form-bar">
+        <button class="btn btn-outline btn-sm" onclick="cancelForm()">← Cancel</button>
+        <div id="form-bar-title">fun1</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn btn-outline btn-sm" id="print-btn" onclick="printEntry()" title="Print form" style="">🖨️</button>
+          <button class="btn btn-accent btn-sm" onclick="saveEntry()">Save ✓</button>
+        </div>
+      </div>
+      <div id="form-content">
+
+    <div class="sec-hd">Basic Information</div>
+    <div class="card"><div class="card-bd" style="display:flex;flex-direction:column;gap:8px">
+      <div class="fr4">
+        <div class="fg"><label>Specimen #</label>
+          <input type="text" id="f-specNum" placeholder="WDC-001" autocapitalize="characters"></div>
+        <div class="fg"><label>Date Found</label>
+          <input type="date" id="f-dateDiscovered"></div>
+        <div class="fg"><label>Collector</label>
+          <input type="text" id="f-by" placeholder="Name"></div>
+        <div class="fg"><label>Intern/Staff</label>
+          <input type="text" id="f-internStaff" placeholder="Name"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px">
+        <div class="fg" style="flex-shrink:0;margin-bottom:0">
+          <label>Side</label>
+          <div style="display:flex;gap:12px;padding:9px 4px;align-items:center">
+            <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:15px;cursor:pointer">
+              <input type="checkbox" id="f-elementLeft" style="width:18px;height:18px;accent-color:var(--primary)"> Left
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:15px;cursor:pointer">
+              <input type="checkbox" id="f-elementRight" style="width:18px;height:18px;accent-color:var(--primary)"> Right
+            </label>
+          </div>
+        </div>
+        <div class="fg" style="flex:2;min-width:130px;margin-bottom:0"><label>Element</label>
+          <select id="f-element"><option value="">— select —</option><option value="Atlas">Atlas</option><option value="Axis">Axis</option><option value="Astragalus">Astragalus</option><option value="Calcaneum">Calcaneum</option><option value="Carpal">Carpal</option><option value="Caudal vertebra">Caudal vertebra</option><option value="Cervical vertebra">Cervical vertebra</option><option value="Chevron">Chevron</option><option value="Coracoid">Coracoid</option><option value="Cranium">Cranium</option><option value="Dorsal vertebra">Dorsal vertebra</option><option value="Femur">Femur</option><option value="Fibula">Fibula</option><option value="Frontal">Frontal</option><option value="Gastralia">Gastralia</option><option value="Humerus">Humerus</option><option value="Ilium">Ilium</option><option value="Ischium">Ischium</option><option value="Jugal">Jugal</option><option value="Lacrimal">Lacrimal</option><option value="Mandible">Mandible</option><option value="Manual phalanx">Manual phalanx</option><option value="Manual ungual">Manual ungual</option><option value="Maxilla">Maxilla</option><option value="Metacarpal">Metacarpal</option><option value="Metatarsal">Metatarsal</option><option value="Nasal">Nasal</option><option value="Osteoderm">Osteoderm</option><option value="Parietal">Parietal</option><option value="Pedal phalanx">Pedal phalanx</option><option value="Pedal ungual">Pedal ungual</option><option value="Premaxilla">Premaxilla</option><option value="Pubis">Pubis</option><option value="Quadrate">Quadrate</option><option value="Radius">Radius</option><option value="Rib">Rib</option><option value="Sacral vertebra">Sacral vertebra</option><option value="Scapula">Scapula</option><option value="Squamosal">Squamosal</option><option value="Sternal plate">Sternal plate</option><option value="Tarsal">Tarsal</option><option value="Teeth">Teeth</option><option value="Tibia">Tibia</option><option value="Ulna">Ulna</option><option value="Indeterminate">Indeterminate</option><option value="Other">Other</option></select></div>
+        <div class="fg" style="flex:1;min-width:90px;margin-bottom:0"><label>&nbsp;</label>
+          <input type="text" id="f-elementOther" placeholder="Specify…"></div>
+        <div class="fg" style="flex:2;min-width:130px;margin-bottom:0"><label>Taxon</label>
+          <select id="f-taxon"><option value="">— select —</option><optgroup label="This Site"><option value="Allosaurus">Allosaurus</option></optgroup><optgroup label="All Taxa"><option value="Allosaurus">Allosaurus</option><option value="Apatosaurus">Apatosaurus</option><option value="Barosaurus">Barosaurus</option><option value="Brachiosaurus">Brachiosaurus</option><option value="Brontosaurus">Brontosaurus</option><option value="Camarasaurus">Camarasaurus</option><option value="Camptosaurus">Camptosaurus</option><option value="Ceratosaurus">Ceratosaurus</option><option value="Diplodocus">Diplodocus</option><option value="Dryosaurus">Dryosaurus</option><option value="Gargoyleosaurus">Gargoyleosaurus</option><option value="Haplocanthosaurus">Haplocanthosaurus</option><option value="Marshosaurus">Marshosaurus</option><option value="Mymoorapelta">Mymoorapelta</option><option value="Stegosaurus">Stegosaurus</option><option value="Stokesosaurus">Stokesosaurus</option><option value="Supersaurus">Supersaurus</option><option value="Torvosaurus">Torvosaurus</option><option value="Indeterminate">Indeterminate</option><option value="Other">Other</option></optgroup></select></div>
+        <div class="fg" style="flex:1;min-width:90px;margin-bottom:0"><label>&nbsp;</label>
+          <input type="text" id="f-taxonOther" placeholder="Specify…"></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+        <div class="fg" style="margin-bottom:0"><label>In Situ?</label>
+          <div class="toggle-group" id="tg-inSitu">
+            <div class="toggle-btn" data-v="Yes" onclick="selToggle(&#39;inSitu&#39;,&#39;Yes&#39;)">Yes</div>
+            <div class="toggle-btn" data-v="No" onclick="selToggle(&#39;inSitu&#39;,&#39;No&#39;)">No</div>
+          </div></div>
+        <div class="fg" id="approx-grp" style="display:none;margin-bottom:0"><label>Approx. Position Known?</label>
+          <div class="toggle-group" id="tg-approxPosKnown">
+            <div class="toggle-btn" data-v="Yes" onclick="selToggle(&#39;approxPosKnown&#39;,&#39;Yes&#39;)">Yes</div>
+            <div class="toggle-btn" data-v="No" onclick="selToggle(&#39;approxPosKnown&#39;,&#39;No&#39;)">No</div>
+          </div></div>
+        <div class="fg" style="width:115px;flex-shrink:0;margin-bottom:0"><label>Bone % Missing</label>
+          <select id="f-boneMissing"><option value="">—</option><option value="0">0%</option><option value="5">5%</option><option value="10">10%</option><option value="15">15%</option><option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="35">35%</option><option value="40">40%</option><option value="45">45%</option><option value="50">50%</option><option value="55">55%</option><option value="60">60%</option><option value="65">65%</option><option value="70">70%</option><option value="75">75%</option><option value="80">80%</option><option value="85">85%</option><option value="90">90%</option><option value="95">95%</option><option value="100">100%</option></select></div>
+        <div class="fg" style="width:115px;flex-shrink:0;margin-bottom:0"><label>Pre-Dep % Complete</label>
+          <select id="f-preDepPct"><option value="">—</option><option value="0">0%</option><option value="5">5%</option><option value="10">10%</option><option value="15">15%</option><option value="20">20%</option><option value="25">25%</option><option value="30">30%</option><option value="35">35%</option><option value="40">40%</option><option value="45">45%</option><option value="50">50%</option><option value="55">55%</option><option value="60">60%</option><option value="65">65%</option><option value="70">70%</option><option value="75">75%</option><option value="80">80%</option><option value="85">85%</option><option value="90">90%</option><option value="95">95%</option><option value="100">100%</option></select></div>
+      </div>
+      <div class="fg" style="margin-bottom:0"><label>Predepositional Condition</label>
+        <div class="pill-group" id="pg-preDepCondition">
+          <div class="pill" data-v="unbroken" onclick="togglePill(&#39;preDepCondition&#39;,&#39;unbroken&#39;)">unbroken</div><div class="pill" data-v="broken" onclick="togglePill(&#39;preDepCondition&#39;,&#39;broken&#39;)">broken</div><div class="pill" data-v="shattered" onclick="togglePill(&#39;preDepCondition&#39;,&#39;shattered&#39;)">shattered</div><div class="pill" data-v="weathered" onclick="togglePill(&#39;preDepCondition&#39;,&#39;weathered&#39;)">weathered</div><div class="pill" data-v="eroded" onclick="togglePill(&#39;preDepCondition&#39;,&#39;eroded&#39;)">eroded</div><div class="pill" data-v="pathologic" onclick="togglePill(&#39;preDepCondition&#39;,&#39;pathologic&#39;)">pathologic</div>
+        </div></div>
+      <div class="fg" style="margin-bottom:0"><label>Current Fossil Condition</label>
+        <div class="pill-group" id="pg-currentCondition">
+          <div class="pill" data-v="unbroken" onclick="togglePill(&#39;currentCondition&#39;,&#39;unbroken&#39;)">unbroken</div><div class="pill" data-v="broken" onclick="togglePill(&#39;currentCondition&#39;,&#39;broken&#39;)">broken</div><div class="pill" data-v="shattered" onclick="togglePill(&#39;currentCondition&#39;,&#39;shattered&#39;)">shattered</div><div class="pill" data-v="weathered" onclick="togglePill(&#39;currentCondition&#39;,&#39;weathered&#39;)">weathered</div><div class="pill" data-v="eroded" onclick="togglePill(&#39;currentCondition&#39;,&#39;eroded&#39;)">eroded</div><div class="pill" data-v="oxidized" onclick="togglePill(&#39;currentCondition&#39;,&#39;oxidized&#39;)">oxidized</div>
+        </div></div>
+      <div class="fg" style="margin-bottom:0"><label>Chemicals Used</label>
+        <div class="pill-group" id="pg-chemicals">
+          <div class="pill" data-v="Thin cyano" onclick="togglePill(&#39;chemicals&#39;,&#39;Thin cyano&#39;)">Thin cyano</div><div class="pill" data-v="Thick cyano" onclick="togglePill(&#39;chemicals&#39;,&#39;Thick cyano&#39;)">Thick cyano</div><div class="pill" data-v="Accelerator" onclick="togglePill(&#39;chemicals&#39;,&#39;Accelerator&#39;)">Accelerator</div><div class="pill" data-v="None" onclick="togglePill(&#39;chemicals&#39;,&#39;None&#39;)">None</div>
+        </div></div>
+    </div></div>
+
+    <div class="sec-hd">Long Axis Measurements</div>
+    <div class="card"><div class="card-bd">
+      <div class="fr-meas">
+        <div class="fg"><label>Orientation (°)</label>
+          <input type="number" id="f-orientation" placeholder="0–360" inputmode="decimal"></div>
+        <div class="fg"><label>Plunge (°)</label>
+          <input type="number" id="f-plunge" placeholder="0–90" inputmode="decimal"></div>
+        <div class="fg"><label>Max Length (cm)</label>
+          <input type="number" id="f-maxLength" placeholder="cm" inputmode="decimal"></div>
+        <div class="fg"><label>Width at Midpoint (cm)</label>
+          <input type="number" id="f-widthMid" placeholder="cm" inputmode="decimal"></div>
+      </div>
+    </div></div>
+
+    <div class="sec-hd">Radial Map Points (cm)</div>
+    <div class="card"><div class="card-bd">
+      <div class="radial-grid">
+        
+          <div>
+            <div class="radial-pt-hd">Point A</div>
+            <div class="radial-pt-body">
+              
+                <div class="radial-row">
+                  <span class="radial-lbl">Stk</span>
+                  <input type="text" id="r-A-0-s" placeholder="—" inputmode="decimal">
+                  <span class="radial-lbl" style="margin-left:2px">Mes</span>
+                  <input type="text" id="r-A-0-m" placeholder="—" inputmode="decimal">
+                </div>
+                <div class="radial-row">
+                  <span class="radial-lbl">Stk</span>
+                  <input type="text" id="r-A-1-s" placeholder="—" inputmode="decimal">
+                  <span class="radial-lbl" style="margin-left:2px">Mes</span>
+                  <input type="text" id="r-A-1-m" placeholder="—" inputmode="decimal">
+                </div>
+            </div>
+          </div>
+          <div>
+            <div class="radial-pt-hd">Point B</div>
+            <div class="radial-pt-body">
+              
+                <div class="radial-row">
+                  <span class="radial-lbl">Stk</span>
+                  <input type="text" id="r-B-0-s" placeholder="—" inputmode="decimal">
+                  <span class="radial-lbl" style="margin-left:2px">Mes</span>
+                  <input type="text" id="r-B-0-m" placeholder="—" inputmode="decimal">
+                </div>
+                <div class="radial-row">
+                  <span class="radial-lbl">Stk</span>
+                  <input type="text" id="r-B-1-s" placeholder="—" inputmode="decimal">
+                  <span class="radial-lbl" style="margin-left:2px">Mes</span>
+                  <input type="text" id="r-B-1-m" placeholder="—" inputmode="decimal">
+                </div>
+            </div>
+          </div>
+          <div>
+            <div class="radial-pt-hd">Point C</div>
+            <div class="radial-pt-body">
+              
+                <div class="radial-row">
+                  <span class="radial-lbl">Stk</span>
+                  <input type="text" id="r-C-0-s" placeholder="—" inputmode="decimal">
+                  <span class="radial-lbl" style="margin-left:2px">Mes</span>
+                  <input type="text" id="r-C-0-m" placeholder="—" inputmode="decimal">
+                </div>
+                <div class="radial-row">
+                  <span class="radial-lbl">Stk</span>
+                  <input type="text" id="r-C-1-s" placeholder="—" inputmode="decimal">
+                  <span class="radial-lbl" style="margin-left:2px">Mes</span>
+                  <input type="text" id="r-C-1-m" placeholder="—" inputmode="decimal">
+                </div>
+            </div>
+          </div>
+          <div>
+            <div class="radial-pt-hd">Point D</div>
+            <div class="radial-pt-body">
+              
+                <div class="radial-row">
+                  <span class="radial-lbl">Stk</span>
+                  <input type="text" id="r-D-0-s" placeholder="—" inputmode="decimal">
+                  <span class="radial-lbl" style="margin-left:2px">Mes</span>
+                  <input type="text" id="r-D-0-m" placeholder="—" inputmode="decimal">
+                </div>
+                <div class="radial-row">
+                  <span class="radial-lbl">Stk</span>
+                  <input type="text" id="r-D-1-s" placeholder="—" inputmode="decimal">
+                  <span class="radial-lbl" style="margin-left:2px">Mes</span>
+                  <input type="text" id="r-D-1-m" placeholder="—" inputmode="decimal">
+                </div>
+            </div>
+          </div>
+      </div>
+    </div></div>
+
+    <div class="sec-hd">Photos</div>
+    <div class="card"><div class="card-bd">
+      <div class="fr2">
+        <div class="fg"><label>Camera #</label>
+          <input type="text" id="f-cameraNum" placeholder="Camera ID"></div>
+        <div class="fg"><label>Picture #</label>
+          <input type="text" id="f-pictureNum" placeholder="Start number"></div>
+      </div>
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Field Photos</label>
+      <div class="photo-grid" id="photo-grid"><div class="photo-add" onclick="document.getElementById(&#39;photo-input&#39;).click()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+      <circle cx="12" cy="13" r="4"></circle></svg>
+    Add Photo
+  </div></div>
+      <p class="help" style="margin-top:8px">Include scale bar, specimen ID#, and North arrow in each photo</p>
+    </div></div>
+
+    <div class="sec-hd">Field Notes</div>
+    <div class="card"><div class="card-hd">Field Notes</div><div class="card-bd">
+      <div class="fg"><label>Geologic Information</label>
+        <textarea id="f-geologicInfo" rows="3" placeholder="Barite nodules, unusual rock type, matrix description…"></textarea></div>
+      <div class="fg"><label>Associations / Articulations / Comments</label>
+        <textarea id="f-associations" rows="4" placeholder="Associated bones, articulation state, spatial relationships, other observations…"></textarea></div>
+      <div class="fg"><label>If More Than One Bone in Jacket — List Included #'s</label>
+        <input type="text" id="f-jacketBones" placeholder="e.g., 042, 043, 044"></div>
+    </div></div>
+
+    <div class="sec-hd">Mapping &amp; Removal</div>
+    <div class="card"><div class="card-hd">Mapping</div><div class="card-bd">
+      <div class="fr4" style="margin-bottom:10px">
+        <div class="fg"><label>Date Mapped</label>
+          <input type="date" id="f-dateMapped"></div>
+        <div class="fg"><label>Mapped By</label>
+          <input type="text" id="f-mappedBy" placeholder="Name"></div>
+        <div class="fg"><label>Placed on Map By</label>
+          <input type="text" id="f-physMapBy" placeholder="Name"></div>
+        <div class="fg"><label>Physical Map Date</label>
+          <input type="date" id="f-physMapDate"></div>
+      </div>
+      <div class="fg" style="margin-bottom:0"><label>Ready for Removal?</label>
+        <div class="toggle-group" id="tg-readyForRemoval">
+          <div class="toggle-btn" data-v="Yes" onclick="selToggle(&#39;readyForRemoval&#39;,&#39;Yes&#39;)">✅ Yes — Ready</div>
+          <div class="toggle-btn" data-v="No" onclick="selToggle(&#39;readyForRemoval&#39;,&#39;No&#39;)">Not Yet</div>
+        </div>
+        <p class="help">Check that all information is recorded before marking ready</p></div>
+    </div></div>
+    <div class="card"><div class="card-hd">Removal Information</div><div class="card-bd">
+      <div class="fr2">
+        <div class="fg"><label>Date Collected</label>
+          <input type="date" id="f-dateCollected"></div>
+        <div class="fg"><label>Collected By</label>
+          <input type="text" id="f-collectedBy" placeholder="Name"></div>
+      </div>
+      <div class="fg"><label>If Partially Removed</label>
+        <input type="text" id="f-partiallyRemoved" placeholder="Describe partial removal…"></div>
+      <div class="fg"><label>Removal Method</label>
+        <input type="text" id="f-removalMethod" placeholder="e.g., field jacket, direct lift, pedestal"></div>
+      <div class="fg"><label>Location within Temporary Collections</label>
+        <input type="text" id="f-locTempCollections" placeholder="e.g., Tent B, Shelf 3"></div>
+      <div class="fr2">
+        <div class="fg"><label>Collection Date</label>
+          <input type="date" id="f-collectionDate"></div>
+        <div class="fg"><label>Staff Signature / Initials</label>
+          <input type="text" id="f-staffSig" placeholder="Initials"></div>
+      </div>
+    </div></div>
+
+    <div style="display:flex;gap:10px;margin-top:4px;padding-bottom:8px">
+      <button class="btn btn-accent btn-block" onclick="saveEntry()">✅ Save Entry</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteEntry()">🗑</button>
+    </div>
+  </div>
+    </div>
+
+    <!-- SETTINGS VIEW -->
+    <div class="view" id="view-settings" style="padding:16px">
+      <div class="sett-title">Collector</div>
+      <div class="sett-card" style="margin-bottom:18px">
+        <div class="sett-row">
+          <label>Your Name (default Intern/Staff)</label>
+          <input type="text" id="s-collector" placeholder="e.g., Jane Smith" oninput="saveSett()">
+        </div>
+      </div>
+
+      <div class="sett-title">Google Integration (optional)</div>
+      <div class="sett-card" style="margin-bottom:6px">
+        <div class="sett-row">
+          <label>Google Client ID</label>
+          <input type="text" id="s-client-id" placeholder="xxxxxx.apps.googleusercontent.com" oninput="saveSett()">
+          <small>Create at <strong>console.cloud.google.com</strong> → APIs &amp; Services → Credentials → OAuth 2.0 Web Client. Add this page's URL to Authorized JavaScript Origins.</small>
+        </div>
+        <div class="sett-row">
+          <label>Google Sheets ID</label>
+          <input type="text" id="s-sheet-id" placeholder="Paste spreadsheet ID from URL" oninput="saveSett()">
+          <small>From your Sheet URL: /d/<strong style="color:var(--primary)">THIS_PART</strong>/edit</small>
+        </div>
+        <div class="sett-row">
+          <label>Sheet Tab Name</label>
+          <input type="text" id="s-sheet-tab" placeholder="Sheet1" oninput="saveSett()">
+        </div>
+        <div class="sett-row">
+          <label>Google Drive Folder ID (photos)</label>
+          <input type="text" id="s-folder-id" placeholder="Paste folder ID from Drive URL" oninput="saveSett()">
+        </div>
+      </div>
+      <div id="google-auth-area" style="margin-bottom:18px"><div class="sett-title" style="margin-top:0">Google Account</div>
+      <div style="background:rgba(230,126,34,.1);border:1.5px solid rgba(230,126,34,.35);border-radius:9px;padding:11px 13px;font-size:13px;color:var(--warn);font-weight:600">
+        ⚠️ Enter your Google Client ID above to enable sign-in</div></div>
+
+      <div class="sett-title">Setup Guide</div>
+      <div class="sett-card" style="margin-bottom:18px">
+        <div class="sett-row">
+          <div class="instr">
+            <strong>No Google setup needed:</strong> Use fully offline. Export CSV anytime to import into Sheets manually.<br><br>
+            <strong>Full Google sync:</strong><br>
+            1. Create a Google Cloud project → Enable Drive API + Sheets API<br>
+            2. Create OAuth 2.0 Web Client credentials<br>
+            3. Add this app's URL to Authorized JavaScript Origins<br>
+            4. Paste Client ID above, create a Google Sheet, paste its ID above<br>
+            5. Sign in below — entries sync automatically on save<br><br>
+            <strong>Hosting tip:</strong> Upload this HTML to GitHub Pages. All team members share the same URL, each configures their own name in Settings.
+          </div>
+        </div>
+      </div>
+      <div class="sett-title">Danger Zone</div>
+      <div style="display:flex;gap:8px;margin-bottom:30px">
+        <button class="btn btn-danger btn-sm btn-block" onclick="clearAllData()">🗑 Clear All Local Data</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- BOTTOM NAV -->
+  <div id="nav">
+    <button class="nav-btn active" id="nav-btn-sites" onclick="showView(&#39;sites&#39;)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+      Sites
+    </button>
+    <button class="nav-btn disabled" id="nav-btn-entries" onclick="gotoEntries()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      Entries
+      <div class="nav-badge" id="pending-badge" style="display: none;">0</div>
+    </button>
+    <button class="nav-btn" id="nav-btn-settings" onclick="showView(&#39;settings&#39;)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06-.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      Settings
+    </button>
+  </div>
+</div>
+
+<div id="toast" class="">All data cleared</div>
+
+<div id="photo-viewer">
+  <button id="pv-close" onclick="closePV()">✕</button>
+  <img id="pv-img" src="file:///Users/rgrandy/Library/Application%20Support/Claude/local-agent-mode-sessions/3a8e7064-0bd3-4fde-a5b7-696e928c3036/ae6cdefa-a29d-44f9-af49-72d85aede8c8/local_2f742189-2b39-4714-a318-64b1cf28ab46/outputs/WDC_Field_Collector.html" alt="">
+  <div class="pv-actions">
+    <button class="pv-btn" style="background:rgba(255,255,255,.15);color:#fff" onclick="closePV()">Close</button>
+    <button class="pv-btn" style="background:rgba(192,57,43,.75);color:#fff" onclick="deleteViewedPhoto()">🗑 Delete</button>
+  </div>
+</div>
+
+<input type="file" id="photo-input" accept="image/*" capture="environment" multiple="">
+
+<script>
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let settings = {};
+let sites = [];
+let activeSiteId = null;
+let editingSiteId = null;
+let entries = [];
+let currentEntry = null;
+let db;
+let viewingPhotoIdx = -1;
+let accessToken = null, googleUser = null, tokenClient = null;
+
+// ═══════════════════════════════
+// INDEXEDDB
+// ═══════════════════════════════
+function initDB() {
+  return new Promise((res,rej)=>{
+    const req = indexedDB.open('WDCFieldCollector', 3);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('photos')) d.createObjectStore('photos',{keyPath:'id'});
+      if (!d.objectStoreNames.contains('sketches')) d.createObjectStore('sketches',{keyPath:'id'});
+    };
+    req.onsuccess = e => { db = e.target.result; res(); };
+    req.onerror = rej;
+  });
+}
+const dbPut = (store,obj) => new Promise((res,rej)=>{
+  const tx=db.transaction(store,'readwrite'); tx.objectStore(store).put(obj).onsuccess=e=>res(e.target.result); tx.onerror=rej;});
+const dbGet = (store,id) => new Promise(res=>{
+  const tx=db.transaction(store,'readonly'); const req=tx.objectStore(store).get(id);
+  req.onsuccess=e=>res(e.target.result); req.onerror=()=>res(null);});
+const dbDel = (store,id) => new Promise(res=>{
+  const tx=db.transaction(store,'readwrite'); tx.objectStore(store).delete(id).onsuccess=res;});
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+async function init() {
+  await initDB();
+  loadSett(); loadSites(); loadEntries();
+  renderSitesList(); renderEntries(); updateNavState();
+  updateOnline();
+  window.addEventListener('online', updateOnline);
+  window.addEventListener('offline', updateOnline);
+  renderAuthArea();
+}
+
+function updateOnline() {
+  const el = document.getElementById('online-badge');
+  if (navigator.onLine) { el.className='badge online'; el.textContent='● Online'; }
+  else { el.className='badge offline'; el.textContent='● Offline'; }
+}
+
+// ═══════════════════════════════
+// SETTINGS
+// ═══════════════════════════════
+function loadSett() {
+  settings = JSON.parse(localStorage.getItem('wdc_sett')||'{}');
+  document.getElementById('s-collector').value = settings.collector||'';
+  document.getElementById('s-client-id').value = settings.clientId||'';
+  document.getElementById('s-sheet-id').value = settings.sheetId||'';
+  document.getElementById('s-sheet-tab').value = settings.sheetTab||'Sheet1';
+  document.getElementById('s-folder-id').value = settings.folderId||'';
+}
+function saveSett() {
+  settings.collector = document.getElementById('s-collector').value;
+  settings.clientId = document.getElementById('s-client-id').value;
+  settings.sheetId = document.getElementById('s-sheet-id').value;
+  settings.sheetTab = document.getElementById('s-sheet-tab').value||'Sheet1';
+  settings.folderId = document.getElementById('s-folder-id').value;
+  localStorage.setItem('wdc_sett', JSON.stringify(settings));
+}
+
+// ═══════════════════════════════
+// SITES
+// ═══════════════════════════════
+function loadSites() {
+  sites = JSON.parse(localStorage.getItem('wdc_sites')||'[]');
+  activeSiteId = localStorage.getItem('wdc_active_site')||null;
+  // Validate activeSiteId
+  if (activeSiteId && !sites.find(s=>s.id===activeSiteId)) activeSiteId = null;
+  updateHeaderSite();
+}
+function saveSitesLS() {
+  localStorage.setItem('wdc_sites', JSON.stringify(sites));
+  localStorage.setItem('wdc_active_site', activeSiteId||'');
+  updateHeaderSite(); updateNavState();
+}
+function updateHeaderSite() {
+  const site = sites.find(s=>s.id===activeSiteId);
+  document.getElementById('header-site').textContent = site ? '📍 '+site.name : 'No dig site selected';
+}
+function updateNavState() {
+  const hassite = !!activeSiteId;
+  const entriesBtn = document.getElementById('nav-btn-entries');
+  entriesBtn.classList.toggle('disabled', !hassite);
+}
+
+function toggleNewSitePanel() {
+  const panel = document.getElementById('new-site-panel');
+  panel.classList.toggle('open');
+  closeEditSite(); // close edit if open
+  if (panel.classList.contains('open')) document.getElementById('ns-name').focus();
+  else { document.getElementById('ns-name').value=''; document.getElementById('ns-location').value=''; document.getElementById('ns-notes').value=''; }
+}
+
+function editSite(id, e) {
+  e.stopPropagation();
+  editingSiteId = id;
+  const site = sites.find(s=>s.id===id);
+  document.getElementById('es-name').value = site.name||'';
+  document.getElementById('es-location').value = site.location||'';
+  document.getElementById('es-notes').value = site.notes||'';
+  // Close new site panel if open
+  document.getElementById('new-site-panel').classList.remove('open');
+  const ep = document.getElementById('edit-site-panel');
+  ep.style.display = 'block';
+  document.getElementById('es-name').focus();
+  ep.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeEditSite() {
+  document.getElementById('edit-site-panel').style.display = 'none';
+  editingSiteId = null;
+}
+
+function saveEditSite() {
+  const name = document.getElementById('es-name').value.trim();
+  if (!name) { showToast('⚠️ Site name is required'); return; }
+  const site = sites.find(s=>s.id===editingSiteId);
+  if (!site) return;
+  site.name = name;
+  site.location = document.getElementById('es-location').value.trim();
+  site.notes = document.getElementById('es-notes').value.trim();
+  saveSitesLS(); closeEditSite(); renderSitesList(); updateHeaderSite();
+  showToast('✅ Site updated');
+}
+
+function getGPS(targetInputId) {
+  if (!navigator.geolocation) { showToast('⚠️ GPS not supported on this device'); return; }
+  showToast('📍 Getting location…');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const lat = pos.coords.latitude.toFixed(6);
+      const lon = pos.coords.longitude.toFixed(6);
+      const acc = Math.round(pos.coords.accuracy);
+      document.getElementById(targetInputId).value = `${lat}, ${lon} (±${acc}m)`;
+      showToast(`📍 Got position — ±${acc}m accuracy`);
+    },
+    err => {
+      const msgs = {1:'Location permission denied',2:'Position unavailable',3:'GPS request timed out'};
+      showToast('⚠️ ' + (msgs[err.code]||err.message));
+    },
+    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+  );
+}
+
+function createSite() {
+  const name = document.getElementById('ns-name').value.trim();
+  if (!name) { showToast('⚠️ Site name is required'); return; }
+  const site = {
+    id: 's_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    name, location: document.getElementById('ns-location').value.trim(),
+    notes: document.getElementById('ns-notes').value.trim(),
+    createdAt: Date.now(),
+  };
+  sites.push(site);
+  activeSiteId = site.id;
+  saveSitesLS();
+  toggleNewSitePanel();
+  renderSitesList();
+  renderSyncStatus();
+  updateNavState();
+  showToast('✅ Site "'+name+'" created & selected');
+}
+
+function selectSite(id) {
+  activeSiteId = id;
+  saveSitesLS();
+  renderSitesList();
+  renderSyncStatus();
+  updateNavState();
+  showToast('📍 ' + (sites.find(s=>s.id===id)?.name||'Site') + ' selected');
+}
+
+function deleteSite(id, e) {
+  e.stopPropagation();
+  const site = sites.find(s=>s.id===id);
+  const count = entries.filter(en=>en.siteId===id).length;
+  const msg = count>0
+    ? `Delete "${site.name}"? This site has ${count} entr${count>1?'ies':'y'} — they will also be deleted.`
+    : `Delete "${site.name}"?`;
+  if (!confirm(msg)) return;
+  sites = sites.filter(s=>s.id!==id);
+  if (activeSiteId===id) activeSiteId=null;
+  entries = entries.filter(en=>en.siteId!==id);
+  saveSitesLS(); saveEntriesLS(); renderSitesList(); renderEntries();
+  showToast('Site deleted');
+}
+
+function renderSitesList() {
+  const list = document.getElementById('sites-list');
+  if (!sites.length) {
+    list.innerHTML = `<div class="empty">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <h3>No dig sites yet</h3>
+      <p>Create your first site to start collecting specimens</p>
+    </div>`;
+    return;
+  }
+  list.innerHTML = sites.map(site => {
+    const isActive = site.id === activeSiteId;
+    const count = entries.filter(en=>en.siteId===site.id).length;
+    return `<div class="site-card ${isActive?'active-site':''}" onclick="selectSite('${site.id}')">
+      <div class="site-card-body">
+        <div class="site-meta">
+          <div class="site-name">${isActive?'<span style="color:var(--accent)">✓ </span>':''}${site.name}</div>
+          <div class="site-sub">${[site.location, count+' specimen'+(count!==1?'s':''), site.notes].filter(Boolean).join(' · ')}</div>
+        </div>
+        <button class="site-action-btn" onclick="editSite('${site.id}',event)" title="Edit site">✏️</button>
+        <button class="site-action-btn" onclick="deleteSite('${site.id}',event)" title="Delete site">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════
+// ENTRIES
+// ═══════════════════════════════
+function loadEntries() { entries = JSON.parse(localStorage.getItem('wdc_entries')||'[]'); }
+function saveEntriesLS() {
+  localStorage.setItem('wdc_entries', JSON.stringify(entries));
+  renderSyncStatus();
+}
+function renderSyncStatus() {
+  const siteEntries = entries.filter(e=>e.siteId===activeSiteId);
+  const pending = siteEntries.filter(e=>e.sync!=='synced').length;
+  const el = document.getElementById('sync-summary');
+  const btn = document.getElementById('sync-all-btn');
+  const badge = document.getElementById('pending-badge');
+  // Always update badge first, before any early returns
+  const siteCount = activeSiteId ? siteEntries.length : 0;
+  if (badge) { badge.style.display = siteCount > 0 ? 'flex' : 'none'; badge.textContent = siteCount; }
+  if (!el) return;
+  if (!siteEntries.length) { el.innerHTML=''; if(btn) btn.style.display='none'; return; }
+  if (pending===0) { el.innerHTML='<span class="status-chip synced"><span class="status-dot"></span>All synced</span>'; if(btn) btn.style.display='none'; }
+  else { el.innerHTML=`<span class="status-chip pending"><span class="status-dot"></span>${pending} pending</span>`; if(btn) btn.style.display=accessToken?'':'none'; }
+}
+
+function renderEntries() {
+  const list = document.getElementById('entries-list'); if(!list) return;
+  renderSyncStatus();
+  if (!activeSiteId) {
+    list.innerHTML = `<div class="empty"><p>Select a dig site to see its entries</p></div>`; return;
+  }
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const filtered = entries.filter(e=>e.siteId===activeSiteId)
+    .filter(e=>!q||[e.specimenNum,e.element,e.taxon,e.by].some(v=>(v||'').toLowerCase().includes(q)))
+    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if (!filtered.length) {
+    list.innerHTML=`<div class="empty">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <h3>No entries yet</h3><p>Tap <strong>New Entry</strong> to record your first specimen</p></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(e=>{
+    const sync=e.sync||'pending';
+    const syncIcon=sync==='synced'
+      ?`<svg class="sync-ic" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+      :sync==='error'
+      ?`<svg class="sync-ic" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+      :`<svg class="sync-ic" viewBox="0 0 24 24" fill="none" stroke="#E67E22" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
+    const date=e.dateDiscovered||(e.createdAt?new Date(e.createdAt).toLocaleDateString():'—');
+    const photos=(e.photoIds||[]).length;
+    return `<div class="entry-card" onclick="openEntry('${e.id}')">
+      <div class="entry-accent ${sync}"></div>
+      <div class="entry-body">
+        <div class="entry-spec">${e.specimenNum?'#'+e.specimenNum:'?'}</div>
+        <div class="entry-meta">
+          <div class="entry-title">${[[e.elementLeft?'L':'',e.elementRight?'R':''].filter(Boolean).join('/'),e.element||'Unknown Element',e.elementOther].filter(Boolean).join(' ')}${e.taxon?' — '+e.taxon:''}</div>
+          <div class="entry-sub">${date}${e.by?' · '+e.by:''}${photos?' · 📷 '+photos:''}</div>
+        </div>
+        ${syncIcon}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openEntry(id) {
+  currentEntry = JSON.parse(JSON.stringify(entries.find(e=>e.id===id)));
+  const site = sites.find(s=>s.id===currentEntry.siteId);
+  showView('form');
+  document.getElementById('form-bar-title').textContent = site ? site.name+' — Edit' : 'Edit Entry';
+  const pb = document.getElementById('print-btn'); if(pb) pb.style.display='';
+  buildAndPopulateForm();
+}
+
+function gotoEntries() {
+  if (!activeSiteId) { showToast('Select a dig site first'); showView('sites'); return; }
+  showView('entries');
+}
+
+// ═══════════════════════════════
+// NEW ENTRY
+// ═══════════════════════════════
+function newEntry() {
+  if (!activeSiteId) { showToast('Select a dig site first'); showView('sites'); return; }
+  const site = sites.find(s=>s.id===activeSiteId);
+  currentEntry = {
+    id:'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    siteId: activeSiteId,
+    createdAt: Date.now(), sync:'pending',
+    specimenNum:'', inSitu:'', approxPosKnown:'',
+    element:'', elementLeft:false, elementRight:false, elementOther:'', taxon:'', taxonOther:'', boneMissing:'', preDepPct:'',
+    preDepCondition:[], currentCondition:[], chemicals:[],
+    dateDiscovered: new Date().toISOString().split('T')[0],
+    by: '', internStaff: settings.collector||'',
+    orientation:'', plunge:'', maxLength:'', widthMid:'',
+    radial:{A:[{s:'',m:''},{s:'',m:''}],B:[{s:'',m:''},{s:'',m:''}],C:[{s:'',m:''},{s:'',m:''}],D:[{s:'',m:''},{s:'',m:''}]},
+    photoIds:[], cameraNum:'', pictureNum:'',
+    geologicInfo:'', associations:'', jacketBones:'', sketchData:null,
+    dateMapped:'', mappedBy:'', physMapBy:'', physMapDate:'', readyForRemoval:'',
+    dateCollected:'', collectedBy:'', partiallyRemoved:'',
+    removalMethod:'', locTempCollections:'', collectionDate:'', staffSig:'',
+  };
+  showView('form');
+  document.getElementById('form-bar-title').textContent = site ? site.name : 'New Entry';
+  buildAndPopulateForm();
+}
+
+// ═══════════════════════════════
+// VIEW MANAGEMENT
+// ═══════════════════════════════
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  const nb = document.getElementById('nav-btn-'+name);
+  if(nb) nb.classList.add('active');
+  document.getElementById('content').scrollTop=0;
+  if(name==='entries') renderEntries();
+  if(name==='settings') { loadSett(); renderAuthArea(); }
+}
+
+function cancelForm() {
+  if (confirm('Discard changes to this entry?')) showView('entries');
+}
+
+// ═══════════════════════════════
+// FORM — single scrollable page
+// ═══════════════════════════════
+function buildAndPopulateForm() {
+  const pctOpts = `<option value="">—</option>`+
+    Array.from({length:21},(_,i)=>i*5).map(v=>`<option value="${v}">${v}%</option>`).join('');
+
+  const ELEMENTS = ['','Atlas','Axis','Astragalus','Calcaneum','Carpal','Caudal vertebra','Cervical vertebra','Chevron','Coracoid','Cranium','Dorsal vertebra','Femur','Fibula','Frontal','Gastralia','Humerus','Ilium','Ischium','Jugal','Lacrimal','Mandible','Manual phalanx','Manual ungual','Maxilla','Metacarpal','Metatarsal','Nasal','Osteoderm','Parietal','Pedal phalanx','Pedal ungual','Premaxilla','Pubis','Quadrate','Radius','Rib','Sacral vertebra','Scapula','Squamosal','Sternal plate','Tarsal','Teeth','Tibia','Ulna','Indeterminate','Other'];
+  const TAXA = ['Allosaurus','Apatosaurus','Barosaurus','Brachiosaurus','Brontosaurus','Camarasaurus','Camptosaurus','Ceratosaurus','Diplodocus','Dryosaurus','Gargoyleosaurus','Haplocanthosaurus','Marshosaurus','Mymoorapelta','Stegosaurus','Stokesosaurus','Supersaurus','Torvosaurus','Indeterminate','Other'];
+  const elementOpts = ELEMENTS.map(v=>`<option value="${v}">${v||'— select —'}</option>`).join('');
+  const activeSite = sites.find(s=>s.id===activeSiteId);
+  const siteTaxa = (activeSite?.taxa||[]).filter(t=>t);
+  let taxonOpts = `<option value="">— select —</option>`;
+  if (siteTaxa.length) {
+    taxonOpts += `<optgroup label="This Site">${siteTaxa.map(t=>`<option value="${t}">${t}</option>`).join('')}</optgroup>`;
+    taxonOpts += `<optgroup label="All Taxa">${TAXA.map(v=>`<option value="${v}">${v}</option>`).join('')}</optgroup>`;
+  } else {
+    taxonOpts += TAXA.map(v=>`<option value="${v}">${v}</option>`).join('');
+  }
+  document.getElementById('form-content').innerHTML = `
+
+    <div class="sec-hd">Basic Information</div>
+    <div class="card"><div class="card-bd" style="display:flex;flex-direction:column;gap:8px">
+      <div class="fr4">
+        <div class="fg"><label>Specimen #</label>
+          <input type="text" id="f-specNum" placeholder="WDC-001" autocapitalize="characters"></div>
+        <div class="fg"><label>Date Found</label>
+          <input type="date" id="f-dateDiscovered"></div>
+        <div class="fg"><label>Collector</label>
+          <input type="text" id="f-by" placeholder="Name"></div>
+        <div class="fg"><label>Intern/Staff</label>
+          <input type="text" id="f-internStaff" placeholder="Name"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px">
+        <div class="fg" style="flex-shrink:0;margin-bottom:0">
+          <label>Side</label>
+          <div style="display:flex;gap:12px;padding:9px 4px;align-items:center">
+            <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:15px;cursor:pointer">
+              <input type="checkbox" id="f-elementLeft" style="width:18px;height:18px;accent-color:var(--primary)"> Left
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:15px;cursor:pointer">
+              <input type="checkbox" id="f-elementRight" style="width:18px;height:18px;accent-color:var(--primary)"> Right
+            </label>
+          </div>
+        </div>
+        <div class="fg" style="flex:2;min-width:130px;margin-bottom:0"><label>Element</label>
+          <select id="f-element">${elementOpts}</select></div>
+        <div class="fg" style="flex:1;min-width:90px;margin-bottom:0"><label>&nbsp;</label>
+          <input type="text" id="f-elementOther" placeholder="Specify…"></div>
+        <div class="fg" style="flex:2;min-width:130px;margin-bottom:0"><label>Taxon</label>
+          <select id="f-taxon">${taxonOpts}</select></div>
+        <div class="fg" style="flex:1;min-width:90px;margin-bottom:0"><label>&nbsp;</label>
+          <input type="text" id="f-taxonOther" placeholder="Specify…"></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+        <div class="fg" style="margin-bottom:0"><label>In Situ?</label>
+          <div class="toggle-group" id="tg-inSitu">
+            <div class="toggle-btn" data-v="Yes" onclick="selToggle('inSitu','Yes')">Yes</div>
+            <div class="toggle-btn" data-v="No" onclick="selToggle('inSitu','No')">No</div>
+          </div></div>
+        <div class="fg" id="approx-grp" style="display:none;margin-bottom:0"><label>Approx. Position Known?</label>
+          <div class="toggle-group" id="tg-approxPosKnown">
+            <div class="toggle-btn" data-v="Yes" onclick="selToggle('approxPosKnown','Yes')">Yes</div>
+            <div class="toggle-btn" data-v="No" onclick="selToggle('approxPosKnown','No')">No</div>
+          </div></div>
+        <div class="fg" style="width:115px;flex-shrink:0;margin-bottom:0"><label>Bone % Missing</label>
+          <select id="f-boneMissing">${pctOpts}</select></div>
+        <div class="fg" style="width:115px;flex-shrink:0;margin-bottom:0"><label>Pre-Dep % Complete</label>
+          <select id="f-preDepPct">${pctOpts}</select></div>
+      </div>
+      <div class="fg" style="margin-bottom:0"><label>Predepositional Condition</label>
+        <div class="pill-group" id="pg-preDepCondition">
+          ${['unbroken','broken','shattered','weathered','eroded','pathologic'].map(c=>
+            `<div class="pill" data-v="${c}" onclick="togglePill('preDepCondition','${c}')">${c}</div>`).join('')}
+        </div></div>
+      <div class="fg" style="margin-bottom:0"><label>Current Fossil Condition</label>
+        <div class="pill-group" id="pg-currentCondition">
+          ${['unbroken','broken','shattered','weathered','eroded','oxidized'].map(c=>
+            `<div class="pill" data-v="${c}" onclick="togglePill('currentCondition','${c}')">${c}</div>`).join('')}
+        </div></div>
+      <div class="fg" style="margin-bottom:0"><label>Chemicals Used</label>
+        <div class="pill-group" id="pg-chemicals">
+          ${['Thin cyano','Thick cyano','Accelerator','None'].map(c=>
+            `<div class="pill" data-v="${c}" onclick="togglePill('chemicals','${c}')">${c}</div>`).join('')}
+        </div></div>
+    </div></div>
+
+    <div class="sec-hd">Long Axis Measurements</div>
+    <div class="card"><div class="card-bd">
+      <div class="fr-meas">
+        <div class="fg"><label>Orientation (°)</label>
+          <input type="number" id="f-orientation" placeholder="0–360" inputmode="decimal"></div>
+        <div class="fg"><label>Plunge (°)</label>
+          <input type="number" id="f-plunge" placeholder="0–90" inputmode="decimal"></div>
+        <div class="fg"><label>Max Length (cm)</label>
+          <input type="number" id="f-maxLength" placeholder="cm" inputmode="decimal"></div>
+        <div class="fg"><label>Width at Midpoint (cm)</label>
+          <input type="number" id="f-widthMid" placeholder="cm" inputmode="decimal"></div>
+      </div>
+    </div></div>
+
+    <div class="sec-hd">Radial Map Points (cm)</div>
+    <div class="card"><div class="card-bd">
+      <div class="radial-grid">
+        ${['A','B','C','D'].map(pt=>`
+          <div>
+            <div class="radial-pt-hd">Point ${pt}</div>
+            <div class="radial-pt-body">
+              ${[0,1].map(row=>`
+                <div class="radial-row">
+                  <span class="radial-lbl">Stk</span>
+                  <input type="text" id="r-${pt}-${row}-s" placeholder="—" inputmode="decimal">
+                  <span class="radial-lbl" style="margin-left:2px">Mes</span>
+                  <input type="text" id="r-${pt}-${row}-m" placeholder="—" inputmode="decimal">
+                </div>`).join('')}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div></div>
+
+    <div class="sec-hd">Photos</div>
+    <div class="card"><div class="card-bd">
+      <div class="fr2">
+        <div class="fg"><label>Camera #</label>
+          <input type="text" id="f-cameraNum" placeholder="Camera ID"></div>
+        <div class="fg"><label>Picture #</label>
+          <input type="text" id="f-pictureNum" placeholder="Start number"></div>
+      </div>
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Field Photos</label>
+      <div class="photo-grid" id="photo-grid"></div>
+      <p class="help" style="margin-top:8px">Include scale bar, specimen ID#, and North arrow in each photo</p>
+    </div></div>
+
+    <div class="sec-hd">Field Notes</div>
+    <div class="card"><div class="card-hd">Field Notes</div><div class="card-bd">
+      <div class="fg"><label>Geologic Information</label>
+        <textarea id="f-geologicInfo" rows="3" placeholder="Barite nodules, unusual rock type, matrix description…"></textarea></div>
+      <div class="fg"><label>Associations / Articulations / Comments</label>
+        <textarea id="f-associations" rows="4" placeholder="Associated bones, articulation state, spatial relationships, other observations…"></textarea></div>
+      <div class="fg"><label>If More Than One Bone in Jacket — List Included #'s</label>
+        <input type="text" id="f-jacketBones" placeholder="e.g., 042, 043, 044"></div>
+    </div></div>
+
+    <div class="sec-hd">Mapping &amp; Removal</div>
+    <div class="card"><div class="card-hd">Mapping</div><div class="card-bd">
+      <div class="fr4" style="margin-bottom:10px">
+        <div class="fg"><label>Date Mapped</label>
+          <input type="date" id="f-dateMapped"></div>
+        <div class="fg"><label>Mapped By</label>
+          <input type="text" id="f-mappedBy" placeholder="Name"></div>
+        <div class="fg"><label>Placed on Map By</label>
+          <input type="text" id="f-physMapBy" placeholder="Name"></div>
+        <div class="fg"><label>Physical Map Date</label>
+          <input type="date" id="f-physMapDate"></div>
+      </div>
+      <div class="fg" style="margin-bottom:0"><label>Ready for Removal?</label>
+        <div class="toggle-group" id="tg-readyForRemoval">
+          <div class="toggle-btn" data-v="Yes" onclick="selToggle('readyForRemoval','Yes')">✅ Yes — Ready</div>
+          <div class="toggle-btn" data-v="No" onclick="selToggle('readyForRemoval','No')">Not Yet</div>
+        </div>
+        <p class="help">Check that all information is recorded before marking ready</p></div>
+    </div></div>
+    <div class="card"><div class="card-hd">Removal Information</div><div class="card-bd">
+      <div class="fr2">
+        <div class="fg"><label>Date Collected</label>
+          <input type="date" id="f-dateCollected"></div>
+        <div class="fg"><label>Collected By</label>
+          <input type="text" id="f-collectedBy" placeholder="Name"></div>
+      </div>
+      <div class="fg"><label>If Partially Removed</label>
+        <input type="text" id="f-partiallyRemoved" placeholder="Describe partial removal…"></div>
+      <div class="fg"><label>Removal Method</label>
+        <input type="text" id="f-removalMethod" placeholder="e.g., field jacket, direct lift, pedestal"></div>
+      <div class="fg"><label>Location within Temporary Collections</label>
+        <input type="text" id="f-locTempCollections" placeholder="e.g., Tent B, Shelf 3"></div>
+      <div class="fr2">
+        <div class="fg"><label>Collection Date</label>
+          <input type="date" id="f-collectionDate"></div>
+        <div class="fg"><label>Staff Signature / Initials</label>
+          <input type="text" id="f-staffSig" placeholder="Initials"></div>
+      </div>
+    </div></div>
+
+    <div style="display:flex;gap:10px;margin-top:4px;padding-bottom:8px">
+      <button class="btn btn-accent btn-block" onclick="saveEntry()">✅ Save Entry</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteEntry()">🗑</button>
+    </div>
+  `;
+
+  // Wire up photo input
+  document.getElementById('photo-input').onchange = handlePhotos;
+  // Populate all fields
+  populateForm();
+}
+
+function populateForm() {
+  const e = currentEntry; if(!e) return;
+  const sv=(id,val)=>{ const el=document.getElementById('f-'+id); if(el) el.value=val||''; };
+  const st=(field,val)=>{ document.querySelectorAll(`#tg-${field} .toggle-btn`).forEach(b=>b.classList.toggle('sel',String(b.dataset.v)===String(val))); };
+  const sp=(field,vals)=>{ document.querySelectorAll(`#pg-${field} .pill`).forEach(p=>p.classList.toggle('sel',(vals||[]).includes(p.dataset.v))); };
+
+  sv('specNum',e.specimenNum); sv('dateDiscovered',e.dateDiscovered);
+  sv('by',e.by); sv('internStaff',e.internStaff);
+  sv('element',e.element); sv('elementOther',e.elementOther); sv('taxon',e.taxon); sv('taxonOther',e.taxonOther);
+  const elL=document.getElementById('f-elementLeft'); if(elL) elL.checked=e.elementLeft||false;
+  const elR=document.getElementById('f-elementRight'); if(elR) elR.checked=e.elementRight||false;
+  const bm=document.getElementById('f-boneMissing'); if(bm) bm.value=e.boneMissing||'';
+  const pd=document.getElementById('f-preDepPct'); if(pd) pd.value=e.preDepPct||'';
+  st('inSitu',e.inSitu); st('approxPosKnown',e.approxPosKnown);
+  if(e.inSitu==='No'){const ag=document.getElementById('approx-grp');if(ag)ag.style.display='';}
+  sp('preDepCondition',e.preDepCondition); sp('currentCondition',e.currentCondition); sp('chemicals',e.chemicals);
+  sv('orientation',e.orientation); sv('plunge',e.plunge); sv('maxLength',e.maxLength); sv('widthMid',e.widthMid);
+  ['A','B','C','D'].forEach(pt=>[0,1].forEach(row=>{
+    const p=(e.radial[pt]||[])[row]||{};
+    const si=document.getElementById(`r-${pt}-${row}-s`); const mi=document.getElementById(`r-${pt}-${row}-m`);
+    if(si) si.value=p.s||''; if(mi) mi.value=p.m||'';
+  }));
+  sv('cameraNum',e.cameraNum); sv('pictureNum',e.pictureNum);
+  renderPhotoGrid();
+  sv('geologicInfo',e.geologicInfo); sv('associations',e.associations); sv('jacketBones',e.jacketBones);
+  sv('dateMapped',e.dateMapped); sv('mappedBy',e.mappedBy);
+  sv('physMapBy',e.physMapBy); sv('physMapDate',e.physMapDate);
+  st('readyForRemoval',e.readyForRemoval);
+  sv('dateCollected',e.dateCollected); sv('collectedBy',e.collectedBy);
+  sv('partiallyRemoved',e.partiallyRemoved); sv('removalMethod',e.removalMethod);
+  sv('locTempCollections',e.locTempCollections); sv('collectionDate',e.collectionDate); sv('staffSig',e.staffSig);
+}
+
+function collectForm() {
+  if(!currentEntry) return;
+  const g=id=>{ const el=document.getElementById('f-'+id); return el?el.value:''; };
+  currentEntry.specimenNum=g('specNum'); currentEntry.dateDiscovered=g('dateDiscovered');
+  currentEntry.by=g('by'); currentEntry.internStaff=g('internStaff');
+  currentEntry.element=g('element'); currentEntry.elementOther=g('elementOther'); currentEntry.taxon=g('taxon'); currentEntry.taxonOther=g('taxonOther');
+  currentEntry.elementLeft=document.getElementById('f-elementLeft')?.checked||false;
+  currentEntry.elementRight=document.getElementById('f-elementRight')?.checked||false;
+  currentEntry.boneMissing=g('boneMissing'); currentEntry.preDepPct=g('preDepPct');
+  currentEntry.orientation=g('orientation'); currentEntry.plunge=g('plunge');
+  currentEntry.maxLength=g('maxLength'); currentEntry.widthMid=g('widthMid');
+  currentEntry.cameraNum=g('cameraNum'); currentEntry.pictureNum=g('pictureNum');
+  if(!currentEntry.radial) currentEntry.radial={A:[{},{}],B:[{},{}],C:[{},{}],D:[{},{}]};
+  ['A','B','C','D'].forEach(pt=>{
+    currentEntry.radial[pt]=[0,1].map(row=>({
+      s:(document.getElementById(`r-${pt}-${row}-s`)||{}).value||'',
+      m:(document.getElementById(`r-${pt}-${row}-m`)||{}).value||'',
+    }));
+  });
+  currentEntry.geologicInfo=g('geologicInfo'); currentEntry.associations=g('associations');
+  currentEntry.jacketBones=g('jacketBones');
+  currentEntry.dateMapped=g('dateMapped'); currentEntry.mappedBy=g('mappedBy');
+  currentEntry.physMapBy=g('physMapBy'); currentEntry.physMapDate=g('physMapDate');
+  currentEntry.dateCollected=g('dateCollected'); currentEntry.collectedBy=g('collectedBy');
+  currentEntry.partiallyRemoved=g('partiallyRemoved'); currentEntry.removalMethod=g('removalMethod');
+  currentEntry.locTempCollections=g('locTempCollections'); currentEntry.collectionDate=g('collectionDate');
+  currentEntry.staffSig=g('staffSig');
+}
+
+// ═══════════════════════════════
+// FORM INTERACTIONS
+// ═══════════════════════════════
+function selToggle(field,val) {
+  currentEntry[field]=val;
+  document.querySelectorAll(`#tg-${field} .toggle-btn`).forEach(b=>b.classList.toggle('sel',String(b.dataset.v)===String(val)));
+  if(field==='inSitu'){const ag=document.getElementById('approx-grp');if(ag)ag.style.display=val==='No'?'':'none';}
+}
+function togglePill(field,val) {
+  if(!currentEntry[field]) currentEntry[field]=[];
+  const i=currentEntry[field].indexOf(val);
+  if(i>=0) currentEntry[field].splice(i,1); else currentEntry[field].push(val);
+  document.querySelectorAll(`#pg-${field} .pill`).forEach(p=>p.classList.toggle('sel',currentEntry[field].includes(p.dataset.v)));
+}
+
+function saveEntry() {
+  collectForm();
+  currentEntry.updatedAt=Date.now(); currentEntry.sync='pending';
+  const i=entries.findIndex(e=>e.id===currentEntry.id);
+  if(i>=0) entries[i]=currentEntry; else entries.push(currentEntry);
+  // Record taxon to site if it's a real named taxon (not blank/Other/Indeterminate)
+  const taxon=currentEntry.taxon;
+  if(taxon && taxon!=='Other' && taxon!=='Indeterminate') {
+    const site=sites.find(s=>s.id===currentEntry.siteId);
+    if(site){ if(!site.taxa) site.taxa=[]; if(!site.taxa.includes(taxon)) { site.taxa.push(taxon); saveSitesLS(); } }
+  }
+  saveEntriesLS(); renderSitesList();
+  showToast('✅ Entry saved!');
+  syncEntry(currentEntry);
+  showView('entries');
+}
+
+async function deleteEntry() {
+  if(!confirm(`Delete specimen #${currentEntry.specimenNum||'?'}? Cannot be undone.`)) return;
+  for(const pid of (currentEntry.photoIds||[])) await dbDel('photos',pid);
+  await dbDel('sketches',currentEntry.id);
+  entries=entries.filter(e=>e.id!==currentEntry.id);
+  saveEntriesLS(); renderSitesList();
+  showToast('Entry deleted'); showView('entries');
+}
+
+// ═══════════════════════════════
+// PRINT
+// ═══════════════════════════════
+async function printEntry() {
+  collectForm();
+  const e = currentEntry; if(!e) return;
+  const site = sites.find(s=>s.id===e.siteId);
+  const siteName = site ? site.name : '';
+  const siteLocation = site ? (site.location||'') : '';
+
+  // Load photos from IndexedDB
+  const photoDataUrls = [];
+  for(const pid of (e.photoIds||[])){
+    const p = await dbGet('photos', pid);
+    if(p) photoDataUrls.push(p.dataUrl);
+  }
+  const f = v => v||'';
+  const chk = v => v==='Yes' ? '☑ Yes' : v==='No' ? '☐ No' : '☐';
+  const pills = arr => (arr||[]).join(', ') || '—';
+  const radialRow = (pt, row) => {
+    const r = ((e.radial||{})[pt]||[])[row]||{};
+    return `<td>${f(r.s)}</td><td>${f(r.m)}</td>`;
+  };
+
+  const photoHtml = photoDataUrls.length
+    ? photoDataUrls.map(u=>`<img src="${u}" style="max-width:180px;max-height:160px;margin:4px;border:1px solid #ccc">`).join('')
+    : '<em style="color:#999">No photos</em>';
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>WDC Field Specimen Sheet – ${f(e.specimenNum)||'(unsaved)'}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#000;padding:14px;max-width:800px;margin:0 auto}
+  h1{font-size:15px;font-weight:bold;text-align:center;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:10px}
+  h2{font-size:11px;font-weight:bold;background:#ddd;padding:3px 6px;margin:10px 0 5px;border:1px solid #aaa;text-transform:uppercase;letter-spacing:.5px}
+  table{width:100%;border-collapse:collapse;margin-bottom:6px}
+  td,th{border:1px solid #999;padding:3px 6px;vertical-align:top}
+  th{background:#eee;font-weight:bold;white-space:nowrap;width:30%}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:0}
+  .half{border:1px solid #999;padding:3px 6px}
+  .quarter-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #999;margin-bottom:6px}
+  .qcell{padding:3px 6px;border-right:1px solid #999}
+  .qcell:last-child{border-right:none}
+  .qlabel{font-weight:bold;font-size:9px;color:#555;display:block;margin-bottom:1px}
+  .radial-table{border-collapse:collapse;width:100%;table-layout:fixed}
+  .radial-table td,.radial-table th{border:1px solid #999;padding:3px 5px;text-align:center;overflow:hidden}
+  .radial-table th{background:#eee;font-size:9px}
+  .photos{display:flex;flex-wrap:wrap;gap:6px;border:1px solid #ccc;padding:6px;min-height:60px}
+  .sig-line{border-bottom:1px solid #000;min-height:24px;margin-top:4px}
+  @media print{
+    body{padding:0;max-width:none}
+    @page{margin:1.5cm}
+  }
+</style>
+</head><body>
+<h1>Wyoming Dinosaur Center — Field Specimen Sheet</h1>
+
+<div class="quarter-grid">
+  <div class="qcell"><span class="qlabel">Dig Site</span>${f(siteName)}</div>
+  <div class="qcell"><span class="qlabel">Location</span>${f(siteLocation)}</div>
+  <div class="qcell"><span class="qlabel">Specimen #</span><strong>${f(e.specimenNum)}</strong></div>
+  <div class="qcell"><span class="qlabel">Date Discovered</span>${f(e.dateDiscovered)}</div>
+</div>
+<div class="quarter-grid">
+  <div class="qcell"><span class="qlabel">Element</span>${[[e.elementLeft?'Left':'',e.elementRight?'Right':''].filter(Boolean).join('/'),f(e.element),f(e.elementOther)].filter(Boolean).join(' ')}</div>
+  <div class="qcell"><span class="qlabel">Taxon</span>${[f(e.taxon),f(e.taxonOther)].filter(Boolean).join(' — ')}</div>
+  <div class="qcell"><span class="qlabel">Discovered By</span>${f(e.by)}</div>
+  <div class="qcell"><span class="qlabel">Intern/Staff</span>${f(e.internStaff)}</div>
+</div>
+<div class="quarter-grid">
+  <div class="qcell"><span class="qlabel">In Situ</span>${f(e.inSitu)||'—'}</div>
+  <div class="qcell"><span class="qlabel">Approx Position Known</span>${f(e.approxPosKnown)||'—'}</div>
+  <div class="qcell"><span class="qlabel">Bone Missing %</span>${f(e.boneMissing)||'—'}</div>
+  <div class="qcell"><span class="qlabel">Pre-Depositional %</span>${f(e.preDepPct)||'—'}</div>
+</div>
+
+<h2>Condition</h2>
+<table>
+  <tr><th>Pre-Depositional Condition</th><td>${pills(e.preDepCondition)}</td></tr>
+  <tr><th>Current Condition</th><td>${pills(e.currentCondition)}</td></tr>
+  <tr><th>Chemicals Used</th><td>${pills(e.chemicals)}</td></tr>
+</table>
+
+<h2>Measurements &amp; Orientation</h2>
+<div class="quarter-grid" style="margin-bottom:6px">
+  <div class="qcell"><span class="qlabel">Orientation</span>${f(e.orientation)}</div>
+  <div class="qcell"><span class="qlabel">Plunge</span>${f(e.plunge)}</div>
+  <div class="qcell"><span class="qlabel">Max Length</span>${f(e.maxLength)}</div>
+  <div class="qcell"><span class="qlabel">Width (mid)</span>${f(e.widthMid)}</div>
+</div>
+
+<table class="radial-table">
+  <colgroup>
+    <col style="width:8%">
+    <col style="width:23%"><col style="width:23%">
+    <col style="width:23%"><col style="width:23%">
+  </colgroup>
+  <tr>
+    <th>Point</th>
+    <th>Stake 1</th><th>Meas 1</th>
+    <th>Stake 2</th><th>Meas 2</th>
+  </tr>
+  ${['A','B','C','D'].map(pt=>`<tr>
+    <th>${pt}</th>
+    ${radialRow(pt,0)}
+    ${radialRow(pt,1)}
+  </tr>`).join('')}
+</table>
+
+<h2>Photos</h2>
+<table style="margin-bottom:6px">
+  <tr><th style="width:20%">Camera #</th><td style="width:30%">${f(e.cameraNum)}</td><th style="width:20%">Picture #</th><td>${f(e.pictureNum)}</td></tr>
+</table>
+<div class="photos">${photoHtml}</div>
+
+<h2>Geologic &amp; Associations</h2>
+<table>
+  <tr><th>Geologic Info</th><td>${f(e.geologicInfo)}</td></tr>
+  <tr><th>Associations</th><td>${f(e.associations)}</td></tr>
+  <tr><th>Jacket Bones</th><td>${f(e.jacketBones)}</td></tr>
+</table>
+
+<h2>Mapping</h2>
+<div class="quarter-grid" style="margin-bottom:6px">
+  <div class="qcell"><span class="qlabel">Date Mapped</span>${f(e.dateMapped)}</div>
+  <div class="qcell"><span class="qlabel">Mapped By</span>${f(e.mappedBy)}</div>
+  <div class="qcell"><span class="qlabel">Placed on Map By</span>${f(e.physMapBy)}</div>
+  <div class="qcell"><span class="qlabel">Physical Map Date</span>${f(e.physMapDate)}</div>
+</div>
+<table>
+  <tr><th>Ready for Removal</th><td>${f(e.readyForRemoval)||'—'}</td></tr>
+</table>
+
+<h2>Collection &amp; Removal</h2>
+<table>
+  <tr><th>Date Collected</th><td>${f(e.dateCollected)}</td><th>Collected By</th><td>${f(e.collectedBy)}</td></tr>
+  <tr><th>Partially Removed</th><td>${f(e.partiallyRemoved)}</td><th>Removal Method</th><td>${f(e.removalMethod)}</td></tr>
+  <tr><th>Loc. Temp Collections</th><td>${f(e.locTempCollections)}</td><th>Collection Date</th><td>${f(e.collectionDate)}</td></tr>
+</table>
+<table style="margin-top:6px">
+  <tr><th>Staff Signature</th><td><div class="sig-line">${f(e.staffSig)}</div></td></tr>
+</table>
+
+<p style="text-align:center;color:#999;font-size:9px;margin-top:14px">Printed ${new Date().toLocaleString()} · Wyoming Dinosaur Center Field Collection</p>
+</body></html>`;
+
+  const win = window.open('','_blank');
+  if(!win){ showToast('Allow pop-ups to print'); return; }
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{ win.print(); }, 600);
+}
+
+// ═══════════════════════════════
+// PHOTOS
+// ═══════════════════════════════
+async function renderPhotoGrid() {
+  const grid=document.getElementById('photo-grid'); if(!grid) return;
+  let html='';
+  for(let i=0;i<(currentEntry.photoIds||[]).length;i++){
+    const p=await dbGet('photos',currentEntry.photoIds[i]);
+    if(p) html+=`<img class="photo-thumb" src="${p.dataUrl}" alt="Photo ${i+1}" onclick="viewPhoto(${i})">`;
+  }
+  html+=`<div class="photo-add" onclick="document.getElementById('photo-input').click()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+      <circle cx="12" cy="13" r="4"/></svg>
+    Add Photo
+  </div>`;
+  grid.innerHTML=html;
+}
+async function handlePhotos(e) {
+  for(const f of e.target.files){
+    const dataUrl=await fileToDataUrl(f);
+    const id='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
+    await dbPut('photos',{id,dataUrl,name:f.name,entryId:currentEntry.id,synced:false});
+    if(!currentEntry.photoIds) currentEntry.photoIds=[];
+    currentEntry.photoIds.push(id);
+  }
+  e.target.value=''; renderPhotoGrid(); showToast(`📷 ${e.target.files?.length||1} photo(s) added`);
+}
+const fileToDataUrl=f=>new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(f);});
+async function viewPhoto(idx){
+  const p=await dbGet('photos',(currentEntry.photoIds||[])[idx]); if(!p) return;
+  viewingPhotoIdx=idx; document.getElementById('pv-img').src=p.dataUrl; document.getElementById('photo-viewer').classList.add('open');
+}
+function closePV(){document.getElementById('photo-viewer').classList.remove('open');viewingPhotoIdx=-1;}
+async function deleteViewedPhoto(){
+  if(viewingPhotoIdx<0||!confirm('Delete this photo?')) return;
+  await dbDel('photos',currentEntry.photoIds[viewingPhotoIdx]);
+  currentEntry.photoIds.splice(viewingPhotoIdx,1); closePV(); renderPhotoGrid();
+}
+
+// ═══════════════════════════════
+// GOOGLE AUTH
+// ═══════════════════════════════
+function renderAuthArea(){
+  const el=document.getElementById('google-auth-area'); if(!el) return;
+  if(accessToken){
+    el.innerHTML=`<div class="sett-title" style="margin-top:0">Google Account</div>
+      <div class="sett-card" style="margin-bottom:10px">
+        <div class="sett-row" style="flex-direction:row;align-items:center;gap:12px">
+          <div style="flex:1"><div style="font-weight:700">${googleUser?.name||'Signed in'}</div>
+          <div style="font-size:12px;color:var(--muted)">${googleUser?.email||''}</div></div>
+          <button class="btn btn-sm btn-outline" onclick="googleSignOut()">Sign Out</button>
+        </div></div>
+      <button class="btn btn-accent btn-block" onclick="syncAll()">🔄 Sync All Pending</button>`;
+  } else {
+    const has=!!settings.clientId;
+    el.innerHTML=`<div class="sett-title" style="margin-top:0">Google Account</div>
+      ${has?`<button class="btn btn-primary btn-block" onclick="googleSignIn()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Sign in with Google</button>`
+      :`<div style="background:rgba(230,126,34,.1);border:1.5px solid rgba(230,126,34,.35);border-radius:9px;padding:11px 13px;font-size:13px;color:var(--warn);font-weight:600">
+        ⚠️ Enter your Google Client ID above to enable sign-in</div>`}`;
+    if(has) loadGIS();
+  }
+}
+function loadGIS(){
+  if(document.getElementById('gis-script')){initTokenClient();return;}
+  const s=document.createElement('script');s.id='gis-script';s.src='https://accounts.google.com/gsi/client';
+  s.onload=initTokenClient;document.head.appendChild(s);
+}
+function initTokenClient(){
+  if(!window.google?.accounts?.oauth2||!settings.clientId) return;
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:settings.clientId,
+    scope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+    callback:async resp=>{
+      if(resp.error){showToast('⚠️ Auth failed: '+resp.error);return;}
+      accessToken=resp.access_token;
+      try{const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+accessToken}});googleUser=await r.json();}catch(e){}
+      renderAuthArea(); showToast('✅ Signed in as '+(googleUser?.name||'Google User')); renderSyncStatus();
+    },
+  });
+}
+function googleSignIn(){if(!tokenClient){loadGIS();setTimeout(googleSignIn,800);return;}tokenClient.requestAccessToken({prompt:'consent'});}
+function googleSignOut(){accessToken=null;googleUser=null;renderAuthArea();renderSyncStatus();}
+
+// ═══════════════════════════════
+// SYNC
+// ═══════════════════════════════
+async function syncEntry(entry){
+  if(!accessToken||!settings.sheetId) return;
+  try{
+    const links=[];
+    for(const pid of (entry.photoIds||[])){
+      const p=await dbGet('photos',pid);
+      if(p&&!p.synced){const lk=await uploadPhoto(p,entry);if(lk){links.push(lk);p.synced=true;p.driveLink=lk;await dbPut('photos',p);}}
+      else if(p?.driveLink) links.push(p.driveLink);
+    }
+    await appendSheet(entry,links);
+    const i=entries.findIndex(e=>e.id===entry.id);
+    if(i>=0){entries[i].sync='synced';entries[i].driveLinks=links;saveEntriesLS();}
+    renderEntries(); showToast('☁️ Synced to Google Sheets');
+  }catch(err){
+    console.error('Sync error',err);
+    const i=entries.findIndex(e=>e.id===entry.id);
+    if(i>=0){entries[i].sync='error';saveEntriesLS();}
+    showToast('⚠️ Sync failed — saved locally'); renderEntries();
+  }
+}
+async function syncAll(){
+  const pending=entries.filter(e=>e.sync!=='synced');
+  if(!pending.length){showToast('All entries already synced!');return;}
+  if(!accessToken){showToast('Sign in to Google first');showView('settings');return;}
+  showToast(`Syncing ${pending.length} entr${pending.length>1?'ies':'y'}…`);
+  for(const e of pending) await syncEntry(e);
+  renderEntries(); renderSyncStatus();
+}
+async function uploadPhoto(photo,entry){
+  const res=await fetch(photo.dataUrl); const blob=await res.blob();
+  const meta={name:`${entry.specimenNum||'unknown'}_${photo.id}.jpg`};
+  if(settings.folderId) meta.parents=[settings.folderId];
+  const form=new FormData();
+  form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+  form.append('file',blob);
+  const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form});
+  if(!r.ok) throw new Error('Drive upload failed');
+  const d=await r.json(); return d.webViewLink||`https://drive.google.com/file/d/${d.id}/view`;
+}
+async function appendSheet(entry,driveLinks){
+  const site=sites.find(s=>s.id===entry.siteId)||{};
+  const gp=(pt,row,f)=>((entry.radial[pt]||[])[row]||{})[f]||'';
+  const row=[
+    site.name||'',site.location||'',
+    entry.specimenNum||'',entry.inSitu||'',entry.approxPosKnown||'',
+    entry.element||'',entry.taxon||'',entry.boneMissing||'',entry.preDepPct||'',
+    (entry.preDepCondition||[]).join(', '),(entry.currentCondition||[]).join(', '),(entry.chemicals||[]).join(', '),
+    entry.dateDiscovered||'',entry.by||'',entry.internStaff||'',
+    entry.orientation||'',entry.plunge||'',entry.maxLength||'',entry.widthMid||'',
+    gp('A',0,'s'),gp('A',0,'m'),gp('A',1,'s'),gp('A',1,'m'),
+    gp('B',0,'s'),gp('B',0,'m'),gp('B',1,'s'),gp('B',1,'m'),
+    gp('C',0,'s'),gp('C',0,'m'),gp('C',1,'s'),gp('C',1,'m'),
+    gp('D',0,'s'),gp('D',0,'m'),gp('D',1,'s'),gp('D',1,'m'),
+    driveLinks.join(', '),entry.cameraNum||'',entry.pictureNum||'',
+    entry.geologicInfo||'',entry.associations||'',entry.jacketBones||'',
+    entry.dateMapped||'',entry.mappedBy||'',entry.physMapBy||'',entry.physMapDate||'',entry.readyForRemoval||'',
+    entry.dateCollected||'',entry.collectedBy||'',entry.partiallyRemoved||'',
+    entry.removalMethod||'',entry.locTempCollections||'',entry.collectionDate||'',entry.staffSig||'',
+    new Date(entry.createdAt||Date.now()).toISOString(),
+    new Date(entry.updatedAt||entry.createdAt||Date.now()).toISOString(),
+  ];
+  const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/${encodeURIComponent(settings.sheetTab||'Sheet1')}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+    {method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({values:[row]})});
+  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Sheets error');}
+}
+
+// ═══════════════════════════════
+// CSV EXPORT
+// ═══════════════════════════════
+function exportCSV(){
+  const siteEntries=entries.filter(e=>e.siteId===activeSiteId);
+  if(!siteEntries.length){showToast('No entries to export');return;}
+  const hdrs=['Dig Site','Site Location','Specimen #','In Situ','Approx Pos Known','Element','Taxon',
+    'Bone % Missing','Pre-Dep % Complete','Pre-Dep Condition','Current Condition','Chemicals',
+    'Date Discovered','By','Intern/Staff','Orientation','Plunge','Max Length (cm)','Width Midpoint (cm)',
+    'A-R1-Stk','A-R1-Mes','A-R2-Stk','A-R2-Mes','B-R1-Stk','B-R1-Mes','B-R2-Stk','B-R2-Mes',
+    'C-R1-Stk','C-R1-Mes','C-R2-Stk','C-R2-Mes','D-R1-Stk','D-R1-Mes','D-R2-Stk','D-R2-Mes',
+    'Photo Links','Camera #','Picture #','Geologic Info','Associations','Jacket Bones',
+    'Date Mapped','Mapped By','Placed on Map By','Physical Map Date','Ready for Removal',
+    'Date Collected','Collected By','Partially Removed','Removal Method','Temp Collections Loc','Collection Date','Staff Sig',
+    'Created At','Updated At'];
+  const site=sites.find(s=>s.id===activeSiteId)||{};
+  const rows=[hdrs,...siteEntries.map(e=>{
+    const gp=(pt,row,f)=>((e.radial[pt]||[])[row]||{})[f]||'';
+    return[site.name||'',site.location||'',
+      e.specimenNum||'',e.inSitu||'',e.approxPosKnown||'',e.element||'',e.taxon||'',e.boneMissing||'',e.preDepPct||'',
+      (e.preDepCondition||[]).join('; '),(e.currentCondition||[]).join('; '),(e.chemicals||[]).join('; '),
+      e.dateDiscovered||'',e.by||'',e.internStaff||'',e.orientation||'',e.plunge||'',e.maxLength||'',e.widthMid||'',
+      gp('A',0,'s'),gp('A',0,'m'),gp('A',1,'s'),gp('A',1,'m'),
+      gp('B',0,'s'),gp('B',0,'m'),gp('B',1,'s'),gp('B',1,'m'),
+      gp('C',0,'s'),gp('C',0,'m'),gp('C',1,'s'),gp('C',1,'m'),
+      gp('D',0,'s'),gp('D',0,'m'),gp('D',1,'s'),gp('D',1,'m'),
+      (e.driveLinks||[]).join('; '),e.cameraNum||'',e.pictureNum||'',
+      e.geologicInfo||'',e.associations||'',e.jacketBones||'',
+      e.dateMapped||'',e.mappedBy||'',e.physMapBy||'',e.physMapDate||'',e.readyForRemoval||'',
+      e.dateCollected||'',e.collectedBy||'',e.partiallyRemoved||'',
+      e.removalMethod||'',e.locTempCollections||'',e.collectionDate||'',e.staffSig||'',
+      e.createdAt?new Date(e.createdAt).toISOString():'',e.updatedAt?new Date(e.updatedAt).toISOString():'',
+    ];
+  })];
+  const csv=rows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  a.download=`${site.name||'WDC'}_specimens_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('📊 CSV downloaded');
+}
+
+// ═══════════════════════════════
+// UTILITIES
+// ═══════════════════════════════
+let toastTmr;
+function showToast(msg){
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTmr);toastTmr=setTimeout(()=>el.classList.remove('show'),3200);
+}
+function clearAllData(){
+  if(!confirm('Delete ALL local data — sites, entries, settings? Cannot be undone.')) return;
+  localStorage.clear(); const tx=db.transaction(['photos','sketches'],'readwrite');
+  tx.objectStore('photos').clear();tx.objectStore('sketches').clear();
+  sites=[];entries=[];activeSiteId=null;settings={};
+  loadSett();renderSitesList();renderEntries();updateNavState();updateHeaderSite();showToast('All data cleared');
+}
+
+init();
+</script>
+
+
+</body></html>

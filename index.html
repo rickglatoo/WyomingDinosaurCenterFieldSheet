@@ -30,6 +30,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text'
   overflow:hidden;text-overflow:ellipsis}
 .badge{font-size:11px;padding:3px 8px;border-radius:10px;font-weight:700;flex-shrink:0}
 .badge.online{background:rgba(39,174,96,.25);color:#2ECC71}
+.badge.ready{background:rgba(243,156,18,.25);color:#F39C12}
 .badge.offline{background:rgba(192,57,43,.25);color:#E74C3C}
 
 /* ── CONTENT ── */
@@ -212,7 +213,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text'
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:18px;transition:opacity .6s ease}
 #splash.hide{opacity:0;pointer-events:none}
-#splash img{width:200px;height:200px;border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+#splash img{width:300px;height:300px;border-radius:32px;box-shadow:0 8px 40px rgba(0,0,0,.5)}
 #splash h2{color:#fff;font-size:18px;font-weight:800;margin:0;text-align:center;letter-spacing:.5px}
 #splash p{color:rgba(255,255,255,.6);font-size:13px;margin:0;text-align:center}
 /* ── WATERMARK ── */
@@ -489,9 +490,10 @@ async function init() {
 }
 
 function updateOnline() {
-  const el = document.getElementById('online-badge');
-  if (navigator.onLine) { el.className='badge online'; el.textContent='● Online'; }
-  else { el.className='badge offline'; el.textContent='● Offline'; }
+  const el = document.getElementById('online-badge'); if(!el) return;
+  if (!navigator.onLine) { el.className='badge offline'; el.textContent='● Offline'; }
+  else if (accessToken) { el.className='badge online'; el.textContent='● Online'; }
+  else { el.className='badge ready'; el.textContent='● Online'; }
 }
 
 // ═══════════════════════════════
@@ -1440,12 +1442,12 @@ function initTokenClient(){
       if(resp.error){showToast('⚠️ Auth failed: '+resp.error);return;}
       accessToken=resp.access_token;
       try{const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+accessToken}});googleUser=await r.json();}catch(e){}
-      renderAuthArea(); showToast('✅ Signed in as '+(googleUser?.name||'Google User')); renderSyncStatus();
+      renderAuthArea(); showToast('✅ Signed in as '+(googleUser?.name||'Google User')); renderSyncStatus(); updateOnline();
     },
   });
 }
 function googleSignIn(){if(!tokenClient){loadGIS();setTimeout(googleSignIn,800);return;}tokenClient.requestAccessToken({prompt:'consent'});}
-function googleSignOut(){accessToken=null;googleUser=null;renderAuthArea();renderSyncStatus();}
+function googleSignOut(){accessToken=null;googleUser=null;renderAuthArea();renderSyncStatus();updateOnline();}
 
 // ═══════════════════════════════
 // SYNC

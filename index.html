@@ -1309,14 +1309,21 @@ async function renderPhotoGrid() {
   grid.innerHTML=html;
 }
 async function handlePhotos(e) {
-  for(const f of e.target.files){
+  const files = Array.from(e.target.files);
+  for(const f of files){
     const dataUrl=await fileToDataUrl(f);
     const id='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
     await dbPut('photos',{id,dataUrl,name:f.name,entryId:currentEntry.id,synced:false});
     if(!currentEntry.photoIds) currentEntry.photoIds=[];
     currentEntry.photoIds.push(id);
   }
-  e.target.value=''; renderPhotoGrid(); showToast(`📷 ${e.target.files?.length||1} photo(s) added`);
+  e.target.value=''; renderPhotoGrid();
+  showToast(`📷 ${files.length} photo(s) added`);
+  // Save to device — iOS share sheet lets user tap "Save Image" to Photos
+  if(files.length && navigator.canShare?.({files})) {
+    try { await navigator.share({files, title:'WDC Field Photo'}); }
+    catch(_){} // dismissed or not supported — photo still saved in app
+  }
 }
 const fileToDataUrl=f=>new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(f);});
 async function viewPhoto(idx){

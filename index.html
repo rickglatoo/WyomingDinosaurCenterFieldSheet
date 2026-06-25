@@ -508,11 +508,11 @@ function loadSett() {
   document.getElementById('s-folder-id').value = settings.folderId||'';
 }
 function saveSett() {
-  settings.collector = document.getElementById('s-collector').value;
-  settings.clientId = document.getElementById('s-client-id').value;
-  settings.sheetId = document.getElementById('s-sheet-id').value;
-  settings.sheetTab = document.getElementById('s-sheet-tab').value||'Sheet1';
-  settings.folderId = document.getElementById('s-folder-id').value;
+  settings.collector = document.getElementById('s-collector').value.trim();
+  settings.clientId = document.getElementById('s-client-id').value.trim();
+  settings.sheetId = document.getElementById('s-sheet-id').value.trim();
+  settings.sheetTab = document.getElementById('s-sheet-tab').value.trim()||'Sheet1';
+  settings.folderId = document.getElementById('s-folder-id').value.trim();
   localStorage.setItem('wdc_sett', JSON.stringify(settings));
 }
 
@@ -1513,9 +1513,11 @@ async function appendSheet(entry,driveLinks){
     new Date(entry.createdAt||Date.now()).toISOString(),
     new Date(entry.updatedAt||entry.createdAt||Date.now()).toISOString(),
   ];
-  const r=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/${encodeURIComponent(settings.sheetTab||'Sheet1')}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+  const sheetUrl=`https://sheets.googleapis.com/v4/spreadsheets/${settings.sheetId}/values/${encodeURIComponent(settings.sheetTab||'Sheet1')}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+  console.log('Sheets URL:', sheetUrl);
+  const r=await fetch(sheetUrl,
     {method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({values:[row]})});
-  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Sheets error');}
+  if(!r.ok){const e=await r.json();console.error('Sheets error body:',e);throw new Error(e.error?.message||'Sheets error '+r.status);}
 }
 
 // ═══════════════════════════════

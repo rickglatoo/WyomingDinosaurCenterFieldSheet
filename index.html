@@ -955,12 +955,6 @@ function buildAndPopulateForm() {
 
     <div class="sec-hd">Photos</div>
     <div class="card"><div class="card-bd">
-      <div class="fr2">
-        <div class="fg"><label>Camera #</label>
-          <input type="text" id="f-cameraNum" placeholder="Camera ID"></div>
-        <div class="fg"><label>Picture #</label>
-          <input type="text" id="f-pictureNum" placeholder="Start number"></div>
-      </div>
       <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Field Photos <span style="font-weight:400;text-transform:none;letter-spacing:0">– tap to save</span></label>
       <div class="photo-grid" id="photo-grid"></div>
       <p class="help" style="margin-top:8px">Include scale bar, specimen ID#, and North arrow in each photo</p>
@@ -1055,7 +1049,6 @@ function populateForm() {
     const i1=document.getElementById(`r-${pt}-m1`); const i2=document.getElementById(`r-${pt}-m2`);
     if(i1) i1.value=m1val; if(i2) i2.value=m2val;
   });
-  sv('cameraNum',e.cameraNum); sv('pictureNum',e.pictureNum);
   renderPhotoGrid();
   sv('geologicInfo',e.geologicInfo); sv('associations',e.associations); sv('jacketBones',e.jacketBones);
   sv('dateMapped',e.dateMapped); sv('mappedBy',e.mappedBy);
@@ -1077,7 +1070,6 @@ function collectForm() {
   currentEntry.boneMissing=g('boneMissing'); currentEntry.preDepPct=g('preDepPct');
   currentEntry.orientation=g('orientation'); currentEntry.plunge=g('plunge');
   currentEntry.maxLength=g('maxLength'); currentEntry.widthMid=g('widthMid');
-  currentEntry.cameraNum=g('cameraNum'); currentEntry.pictureNum=g('pictureNum');
   if(!currentEntry.radial) currentEntry.radial={A:{m1:'',m2:''},B:{m1:'',m2:''},C:{m1:'',m2:''},D:{m1:'',m2:''}};
   ['A','B','C','D'].forEach(pt=>{
     const i1=document.getElementById(`r-${pt}-m1`); const i2=document.getElementById(`r-${pt}-m2`);
@@ -1252,7 +1244,6 @@ async function printEntry() {
 
 <h2>Photos</h2>
 <table style="margin-bottom:6px">
-  <tr><th style="width:20%">Camera #</th><td style="width:30%">${f(e.cameraNum)}</td><th style="width:20%">Picture #</th><td>${f(e.pictureNum)}</td></tr>
 </table>
 <div class="photos">${photoHtml}</div>
 
@@ -1303,10 +1294,16 @@ async function renderPhotoGrid() {
   let html='';
   for(let i=0;i<(currentEntry.photoIds||[]).length;i++){
     const p=await dbGet('photos',currentEntry.photoIds[i]);
-    if(p) html+=`<div style="position:relative">
-      <img class="photo-thumb" src="${p.dataUrl}" alt="Photo ${i+1}" onclick="viewPhoto(${i})">
-      ${p.deviceSaved?`<span style="position:absolute;top:4px;right:4px;background:rgba(39,174,96,.85);color:#fff;font-size:10px;font-weight:700;border-radius:4px;padding:1px 4px;pointer-events:none">S</span>`:''}
-    </div>`;
+    if(p) {
+      const num=String(i+1).padStart(3,'0');
+      html+=`<div style="position:relative;display:flex;flex-direction:column;align-items:center;gap:3px">
+        <div style="position:relative;width:100%">
+          <img class="photo-thumb" src="${p.dataUrl}" alt="Photo ${num}" onclick="viewPhoto(${i})">
+          ${p.deviceSaved?`<span style="position:absolute;top:4px;right:4px;background:rgba(39,174,96,.85);color:#fff;font-size:10px;font-weight:700;border-radius:4px;padding:1px 4px;pointer-events:none">S</span>`:''}
+        </div>
+        <span style="font-size:10px;color:var(--muted);font-weight:600">${num}</span>
+      </div>`;
+    }
   }
   html+=`<div class="photo-add" onclick="document.getElementById('photo-input').click()">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1321,8 +1318,11 @@ async function handlePhotos(e) {
   for(const f of files){
     const dataUrl=await fileToDataUrl(f);
     const id='p_'+Date.now()+'_'+Math.random().toString(36).slice(2,5);
-    await dbPut('photos',{id,dataUrl,name:f.name,entryId:currentEntry.id,synced:false});
     if(!currentEntry.photoIds) currentEntry.photoIds=[];
+    const photoNum=String(currentEntry.photoIds.length+1).padStart(3,'0');
+    const specName=(currentEntry.specimenNum||'photo').replace(/[^a-zA-Z0-9\-]/g,'_');
+    const fname=specName+'_photo-'+photoNum+'.jpg';
+    await dbPut('photos',{id,dataUrl,name:fname,entryId:currentEntry.id,synced:false});
     currentEntry.photoIds.push(id);
   }
   e.target.value=''; renderPhotoGrid();
@@ -1503,7 +1503,7 @@ async function appendSheet(entry,driveLinks){
     gp('B',0,'s'),gp('B',0,'m'),gp('B',1,'s'),gp('B',1,'m'),
     gp('C',0,'s'),gp('C',0,'m'),gp('C',1,'s'),gp('C',1,'m'),
     gp('D',0,'s'),gp('D',0,'m'),gp('D',1,'s'),gp('D',1,'m'),
-    driveLinks.join(', '),entry.cameraNum||'',entry.pictureNum||'',
+    driveLinks.join(', '),
     entry.geologicInfo||'',entry.associations||'',entry.jacketBones||'',
     entry.dateMapped||'',entry.mappedBy||'',entry.physMapBy||'',entry.physMapDate||'',entry.readyForRemoval||'',
     entry.dateCollected||'',entry.collectedBy||'',entry.partiallyRemoved||'',
@@ -1527,7 +1527,7 @@ function exportCSV(){
     'Date Discovered','By','Intern/Staff','Orientation','Plunge','Max Length (cm)','Width Midpoint (cm)',
     'A-R1-Stk','A-R1-Mes','A-R2-Stk','A-R2-Mes','B-R1-Stk','B-R1-Mes','B-R2-Stk','B-R2-Mes',
     'C-R1-Stk','C-R1-Mes','C-R2-Stk','C-R2-Mes','D-R1-Stk','D-R1-Mes','D-R2-Stk','D-R2-Mes',
-    'Photo Links','Camera #','Picture #','Geologic Info','Associations','Jacket Bones',
+    'Photo Links','Geologic Info','Associations','Jacket Bones',
     'Date Mapped','Mapped By','Placed on Map By','Physical Map Date','Ready for Removal',
     'Date Collected','Collected By','Partially Removed','Removal Method','Temp Collections Loc','Collection Date','Staff Sig',
     'Created At','Updated At'];
@@ -1542,7 +1542,7 @@ function exportCSV(){
       gp('B',0,'s'),gp('B',0,'m'),gp('B',1,'s'),gp('B',1,'m'),
       gp('C',0,'s'),gp('C',0,'m'),gp('C',1,'s'),gp('C',1,'m'),
       gp('D',0,'s'),gp('D',0,'m'),gp('D',1,'s'),gp('D',1,'m'),
-      (e.driveLinks||[]).join('; '),e.cameraNum||'',e.pictureNum||'',
+      (e.driveLinks||[]).join('; '),
       e.geologicInfo||'',e.associations||'',e.jacketBones||'',
       e.dateMapped||'',e.mappedBy||'',e.physMapBy||'',e.physMapDate||'',e.readyForRemoval||'',
       e.dateCollected||'',e.collectedBy||'',e.partiallyRemoved||'',

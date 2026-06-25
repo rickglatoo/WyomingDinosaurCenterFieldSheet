@@ -92,6 +92,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text'
 .fg{margin-bottom:11px}
 .fg label{display:block;font-size:11px;font-weight:700;color:var(--muted);
   text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fg input[type=checkbox],.fg input[type=radio]{width:auto!important;padding:0!important;border:none!important;box-shadow:none!important}
 .fg input,.fg select,.fg textarea{width:100%;padding:10px 11px;border:1.5px solid var(--border);
   border-radius:8px;background:var(--input-bg);font-size:16px;color:var(--text);
   outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;font-family:inherit}
@@ -258,7 +259,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text'
         <div class="card-hd" style="background:var(--accent);color:#fff;padding:10px 14px;font-weight:700">Create New Dig Site</div>
         <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
           <div class="fg" style="margin-bottom:0"><label>Site Name / Abbreviation *</label>
-            <input type="text" id="ns-name" placeholder="e.g., ABC, QA, ER7"></div>
+            <input type="text" id="ns-name" placeholder="e.g., ABC, QA, ER7" oninput="this.value=this.value.toUpperCase()" autocapitalize="characters"></div>
           <div class="fg" style="margin-bottom:0"><label>Full Descriptive Name</label>
             <input type="text" id="ns-fullName" placeholder="e.g., Amber's Baby Camarasaurus"></div>
           <div style="display:flex;gap:8px">
@@ -757,7 +758,18 @@ function newEntry() {
     id:'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
     siteId: activeSiteId,
     createdAt: Date.now(), sync:'pending',
-    specimenNum: (()=>{ const yr=new Date().getFullYear(); const n=entries.filter(e=>e.siteId===activeSiteId).length+1; return (site?.name||'')+'-'+yr+'-'+String(n).padStart(3,'0'); })(),
+    specimenNum: (()=>{
+      const yr = new Date().getFullYear();
+      const siteName = site?.name||'';
+      let maxNum = 0;
+      entries.filter(e=>e.siteId===activeSiteId).forEach(e=>{
+        if(e.specimenNum){
+          const m = e.specimenNum.match(/-(\d+)$/);
+          if(m) maxNum = Math.max(maxNum, parseInt(m[1],10));
+        }
+      });
+      return siteName+'-'+yr+'-'+String(maxNum+1).padStart(3,'0');
+    })(),
     inSitu:'', approxPosKnown:'',
     element:'', elementLeft:false, elementRight:false, elementOther:'', taxon:'', taxonOther:'', boneMissing:'', preDepPct:'',
     preDepCondition:[], currentCondition:[], chemicals:[],
@@ -890,11 +902,7 @@ function buildAndPopulateForm() {
 
     <div class="sec-hd">Long Axis Measurements</div>
     <div class="card"><div class="card-bd">
-      <div class="fr-meas">
-        <div class="fg"><label>Orientation (°)</label>
-          <input type="number" id="f-orientation" placeholder="0–360" inputmode="decimal"></div>
-        <div class="fg"><label>Plunge (°)</label>
-          <input type="number" id="f-plunge" placeholder="0–90" inputmode="decimal"></div>
+      <div class="fr2">
         <div class="fg"><label>Max Length (cm)</label>
           <input type="number" id="f-maxLength" placeholder="cm" inputmode="decimal"></div>
         <div class="fg"><label>Width at Midpoint (cm)</label>
@@ -905,22 +913,28 @@ function buildAndPopulateForm() {
     <div class="sec-hd">Radial Map Points (cm)</div>
     <div class="card"><div class="card-bd">
       ${(()=>{
-        const m1 = (activeSite?.marker1||'Marker 1').substring(0,8);
-        const m2 = (activeSite?.marker2||'Marker 2').substring(0,8);
+        const m1lbl = activeSite?.marker1||'Marker 1';
+        const m2lbl = activeSite?.marker2||'Marker 2';
         const rc = currentEntry.radialCount||1;
         const pts = ['A','B','C','D'].slice(0,rc);
         return `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="radial-container">
+        <div class="fr2" style="margin-bottom:4px">
+          <div class="fg" style="margin-bottom:0"><label>Orientation (°)</label>
+            <input type="number" id="f-orientation" placeholder="0–360" inputmode="decimal"></div>
+          <div class="fg" style="margin-bottom:0"><label>Plunge (°)</label>
+            <input type="number" id="f-plunge" placeholder="0–90" inputmode="decimal"></div>
+        </div>
+        <div id="radial-container">
           ${pts.map(pt=>`
-            <div>
+            <div style="margin-top:10px">
               <div class="radial-pt-hd">Point ${pt}</div>
               <div class="radial-pt-body">
                 <div class="radial-row">
-                  <span class="radial-lbl">${m1}</span>
+                  <span class="radial-lbl" style="min-width:3em">${m1lbl}</span>
                   <input type="text" id="r-${pt}-m1" placeholder="—" inputmode="decimal">
                 </div>
                 <div class="radial-row">
-                  <span class="radial-lbl">${m2}</span>
+                  <span class="radial-lbl" style="min-width:3em">${m2lbl}</span>
                   <input type="text" id="r-${pt}-m2" placeholder="—" inputmode="decimal">
                 </div>
               </div>
@@ -955,15 +969,17 @@ function buildAndPopulateForm() {
 
     <div class="sec-hd">Mapping &amp; Removal</div>
     <div class="card"><div class="card-hd">Mapping</div><div class="card-bd">
-      <div class="fr4" style="margin-bottom:10px">
+      <div class="fr2" style="margin-bottom:8px">
         <div class="fg"><label>Date Mapped</label>
           <input type="date" id="f-dateMapped"></div>
         <div class="fg"><label>Mapped By</label>
           <input type="text" id="f-mappedBy" placeholder="Name"></div>
-        <div class="fg"><label>Placed on Map By</label>
-          <input type="text" id="f-physMapBy" placeholder="Name"></div>
+      </div>
+      <div class="fr2" style="margin-bottom:10px">
         <div class="fg"><label>Physical Map Date</label>
           <input type="date" id="f-physMapDate"></div>
+        <div class="fg"><label>Placed on Map By</label>
+          <input type="text" id="f-physMapBy" placeholder="Name"></div>
       </div>
       <div class="fg" style="margin-bottom:0"><label>Ready for Removal?</label>
         <div class="toggle-group" id="tg-readyForRemoval">

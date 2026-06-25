@@ -92,7 +92,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text'
 .fg{margin-bottom:11px}
 .fg label{display:block;font-size:11px;font-weight:700;color:var(--muted);
   text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fg input[type=checkbox],.fg input[type=radio]{width:auto!important;padding:0!important;border:none!important;box-shadow:none!important}
+.fg input[type=checkbox],.fg input[type=radio]{width:auto!important;padding:0!important;border:none!important;box-shadow:none!important;appearance:auto!important;-webkit-appearance:checkbox!important}
 .fg input,.fg select,.fg textarea{width:100%;padding:10px 11px;border:1.5px solid var(--border);
   border-radius:8px;background:var(--input-bg);font-size:16px;color:var(--text);
   outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;font-family:inherit}
@@ -608,7 +608,11 @@ function createSite() {
   if (!name) { showToast('⚠️ Site name is required'); return; }
   const site = {
     id: 's_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-    name, location: document.getElementById('ns-location').value.trim(),
+    name,
+    fullName: document.getElementById('ns-fullName').value.trim(),
+    marker1: document.getElementById('ns-marker1').value.trim()||'Marker 1',
+    marker2: document.getElementById('ns-marker2').value.trim()||'Marker 2',
+    location: document.getElementById('ns-location').value.trim(),
     notes: document.getElementById('ns-notes').value.trim(),
     createdAt: Date.now(),
   };
@@ -902,6 +906,12 @@ function buildAndPopulateForm() {
 
     <div class="sec-hd">Long Axis Measurements</div>
     <div class="card"><div class="card-bd">
+      <div class="fr2" style="margin-bottom:8px">
+        <div class="fg"><label>Orientation (°)</label>
+          <input type="number" id="f-orientation" placeholder="0–360" inputmode="decimal"></div>
+        <div class="fg"><label>Plunge (°)</label>
+          <input type="number" id="f-plunge" placeholder="0–90" inputmode="decimal"></div>
+      </div>
       <div class="fr2">
         <div class="fg"><label>Max Length (cm)</label>
           <input type="number" id="f-maxLength" placeholder="cm" inputmode="decimal"></div>
@@ -918,12 +928,6 @@ function buildAndPopulateForm() {
         const rc = currentEntry.radialCount||1;
         const pts = ['A','B','C','D'].slice(0,rc);
         return `
-        <div class="fr2" style="margin-bottom:4px">
-          <div class="fg" style="margin-bottom:0"><label>Orientation (°)</label>
-            <input type="number" id="f-orientation" placeholder="0–360" inputmode="decimal"></div>
-          <div class="fg" style="margin-bottom:0"><label>Plunge (°)</label>
-            <input type="number" id="f-plunge" placeholder="0–90" inputmode="decimal"></div>
-        </div>
         <div id="radial-container">
           ${pts.map(pt=>`
             <div style="margin-top:10px">

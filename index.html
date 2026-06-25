@@ -961,7 +961,7 @@ function buildAndPopulateForm() {
         <div class="fg"><label>Picture #</label>
           <input type="text" id="f-pictureNum" placeholder="Start number"></div>
       </div>
-      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Field Photos</label>
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Field Photos <span style="font-weight:400;text-transform:none;letter-spacing:0">– tap to save</span></label>
       <div class="photo-grid" id="photo-grid"></div>
       <p class="help" style="margin-top:8px">Include scale bar, specimen ID#, and North arrow in each photo</p>
     </div></div>
@@ -1303,7 +1303,10 @@ async function renderPhotoGrid() {
   let html='';
   for(let i=0;i<(currentEntry.photoIds||[]).length;i++){
     const p=await dbGet('photos',currentEntry.photoIds[i]);
-    if(p) html+=`<img class="photo-thumb" src="${p.dataUrl}" alt="Photo ${i+1}" onclick="viewPhoto(${i})">`;
+    if(p) html+=`<div style="position:relative">
+      <img class="photo-thumb" src="${p.dataUrl}" alt="Photo ${i+1}" onclick="viewPhoto(${i})">
+      ${p.deviceSaved?`<span style="position:absolute;top:4px;right:4px;background:rgba(39,174,96,.85);color:#fff;font-size:10px;font-weight:700;border-radius:4px;padding:1px 4px;pointer-events:none">S</span>`:''}
+    </div>`;
   }
   html+=`<div class="photo-add" onclick="document.getElementById('photo-input').click()">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1340,26 +1343,35 @@ async function captureDeviceOrientation() {
       if (p !== 'granted') { showToast('⚠️ Motion permission denied'); return; }
     } catch(e) { showToast('⚠️ Permission error'); return; }
   }
-  showToast('🧭 Point device along bone axis…');
+  showToast('🧭 Hold phone along bone axis…');
   let captured = false;
-  const capture = (e) => {
+  const doCapture = (e) => {
     if (captured) return;
+    // Use webkitCompassHeading (iOS true north) if available, else absolute alpha
+    let az = null;
+    if (e.webkitCompassHeading != null) {
+      az = Math.round((e.webkitCompassHeading + 360) % 360);
+    } else if (e.absolute && e.alpha != null) {
+      az = Math.round((360 - e.alpha + 360) % 360); // convert to CW-from-north
+    }
+    // Signed plunge: positive = top higher, negative = top lower
+    const pl = e.beta != null ? Math.round(e.beta) : null;
+    if (az == null && pl == null) return; // ignore empty readings
     captured = true;
-    window.removeEventListener('deviceorientationabsolute', capture);
-    window.removeEventListener('deviceorientation', capture);
-    const az = e.alpha != null ? Math.round((e.alpha + 360) % 360) : null;
-    const pl = e.beta  != null ? Math.round(Math.abs(e.beta))      : null;
+    window.removeEventListener('deviceorientationabsolute', doCapture);
+    window.removeEventListener('deviceorientation', doCapture);
     if (az != null) { const el=document.getElementById('f-orientation'); if(el) el.value=az; }
     if (pl != null) { const el=document.getElementById('f-plunge');      if(el) el.value=pl; }
     showToast('🧭 Bearing ' + (az??'–') + '°  Plunge ' + (pl??'–') + '°');
   };
-  window.addEventListener('deviceorientationabsolute', capture);
-  window.addEventListener('deviceorientation', capture);
+  // Prefer absolute; deviceorientation fires on iOS with webkitCompassHeading
+  window.addEventListener('deviceorientationabsolute', doCapture);
+  window.addEventListener('deviceorientation', doCapture);
   setTimeout(() => {
     if (!captured) {
       captured = true;
-      window.removeEventListener('deviceorientationabsolute', capture);
-      window.removeEventListener('deviceorientation', capture);
+      window.removeEventListener('deviceorientationabsolute', doCapture);
+      window.removeEventListener('deviceorientation', doCapture);
       showToast('⚠️ Sensor unavailable');
     }
   }, 3000);
@@ -1373,11 +1385,14 @@ async function savePhotoToDevice(){
   const blob=await res.blob();
   const file=new File([blob], p.name||'wdc-photo.jpg', {type:blob.type||'image/jpeg'});
   if(navigator.canShare?.({files:[file]})){
-    try{ await navigator.share({files:[file], title:'WDC Field Photo'}); }
-    catch(_){}
+    try{
+      await navigator.share({files:[file], title:'WDC Field Photo'});
+      p.deviceSaved=true; await dbPut('photos',p); renderPhotoGrid();
+    } catch(_){}
   } else {
     // Fallback: open image in new tab so user can long-press save
     window.open(p.dataUrl,'_blank');
+    p.deviceSaved=true; await dbPut('photos',p); renderPhotoGrid();
   }
 }
 async function deleteViewedPhoto(){

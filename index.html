@@ -263,9 +263,9 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text'
             <input type="text" id="ns-fullName" placeholder="e.g., Amber's Baby Camarasaurus"></div>
           <div style="display:flex;gap:8px">
             <div class="fg" style="flex:1;margin-bottom:0"><label>Marker 1 Name</label>
-              <input type="text" id="ns-marker1" placeholder="e.g., Stake"></div>
+              <input type="text" id="ns-marker1" placeholder="e.g., N"></div>
             <div class="fg" style="flex:1;margin-bottom:0"><label>Marker 2 Name</label>
-              <input type="text" id="ns-marker2" placeholder="e.g., Distance"></div>
+              <input type="text" id="ns-marker2" placeholder="e.g., 2W"></div>
           </div>
           <div class="fg" style="margin-bottom:0"><label>Location / GPS</label>
             <div style="display:flex;gap:6px">
@@ -286,14 +286,14 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text'
         <div class="card-hd" style="background:var(--primary-lt);color:#fff;padding:10px 14px;font-weight:700">Edit Dig Site</div>
         <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
           <div class="fg" style="margin-bottom:0"><label>Site Name / Abbreviation *</label>
-            <input type="text" id="es-name" placeholder="e.g., ABC"></div>
+            <input type="text" id="es-name" placeholder="e.g., ABC" oninput="this.value=this.value.toUpperCase()" autocapitalize="characters"></div>
           <div class="fg" style="margin-bottom:0"><label>Full Descriptive Name</label>
             <input type="text" id="es-fullName" placeholder="e.g., Amber's Baby Camarasaurus"></div>
           <div style="display:flex;gap:8px">
             <div class="fg" style="flex:1;margin-bottom:0"><label>Marker 1 Name</label>
-              <input type="text" id="es-marker1" placeholder="e.g., Stake"></div>
+              <input type="text" id="es-marker1" placeholder="e.g., N"></div>
             <div class="fg" style="flex:1;margin-bottom:0"><label>Marker 2 Name</label>
-              <input type="text" id="es-marker2" placeholder="e.g., Distance"></div>
+              <input type="text" id="es-marker2" placeholder="e.g., 2W"></div>
           </div>
           <div class="fg" style="margin-bottom:0"><label>Location / GPS</label>
             <div style="display:flex;gap:6px">
@@ -569,7 +569,7 @@ function closeEditSite() {
 }
 
 function saveEditSite() {
-  const name = document.getElementById('es-name').value.trim();
+  const name = document.getElementById('es-name').value.trim().toUpperCase();
   if (!name) { showToast('⚠️ Site name is required'); return; }
   const site = sites.find(s=>s.id===editingSiteId);
   if (!site) return;
@@ -603,7 +603,7 @@ function getGPS(targetInputId) {
 }
 
 function createSite() {
-  const name = document.getElementById('ns-name').value.trim();
+  const name = document.getElementById('ns-name').value.trim().toUpperCase();
   if (!name) { showToast('⚠️ Site name is required'); return; }
   const site = {
     id: 's_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
@@ -757,7 +757,7 @@ function newEntry() {
     id:'e_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
     siteId: activeSiteId,
     createdAt: Date.now(), sync:'pending',
-    specimenNum: (()=>{ const yr=new Date().getFullYear(); const n=entries.filter(e=>e.siteId===activeSiteId).length+1; return (site?.name||'')+yr+String(n).padStart(3,'0'); })(),
+    specimenNum: (()=>{ const yr=new Date().getFullYear(); const n=entries.filter(e=>e.siteId===activeSiteId).length+1; return (site?.name||'')+'-'+yr+'-'+String(n).padStart(3,'0'); })(),
     inSitu:'', approxPosKnown:'',
     element:'', elementLeft:false, elementRight:false, elementOther:'', taxon:'', taxonOther:'', boneMissing:'', preDepPct:'',
     preDepCondition:[], currentCondition:[], chemicals:[],

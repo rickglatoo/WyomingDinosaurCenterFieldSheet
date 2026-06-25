@@ -907,11 +907,15 @@ function buildAndPopulateForm() {
 
     <div class="sec-hd">Long Axis Measurements</div>
     <div class="card"><div class="card-bd">
-      <div class="fr2" style="margin-bottom:8px">
-        <div class="fg"><label>Orientation (°)</label>
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px">
+        <div class="fg" style="flex:1;margin-bottom:0"><label>Orientation (°)</label>
           <input type="number" id="f-orientation" placeholder="0–360" inputmode="decimal"></div>
-        <div class="fg"><label>Plunge (°)</label>
+        <div class="fg" style="flex:1;margin-bottom:0"><label>Plunge (°)</label>
           <input type="number" id="f-plunge" placeholder="0–90" inputmode="decimal"></div>
+        <div style="flex-shrink:0">
+          <button class="btn btn-outline" onclick="captureDeviceOrientation()"
+            style="height:44px;padding:0 12px;font-size:20px" title="Capture bearing & plunge from device">🧭</button>
+        </div>
       </div>
       <div class="fr2">
         <div class="fg"><label>Max Length (cm)</label>
@@ -1327,6 +1331,40 @@ async function viewPhoto(idx){
   viewingPhotoIdx=idx; document.getElementById('pv-img').src=p.dataUrl; document.getElementById('photo-viewer').classList.add('open');
 }
 function closePV(){document.getElementById('photo-viewer').classList.remove('open');viewingPhotoIdx=-1;}
+async function captureDeviceOrientation() {
+  // iOS 13+ requires explicit permission for motion sensors
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    try {
+      const p = await DeviceOrientationEvent.requestPermission();
+      if (p !== 'granted') { showToast('⚠️ Motion permission denied'); return; }
+    } catch(e) { showToast('⚠️ Permission error'); return; }
+  }
+  showToast('🧭 Point device along bone axis…');
+  let captured = false;
+  const capture = (e) => {
+    if (captured) return;
+    captured = true;
+    window.removeEventListener('deviceorientationabsolute', capture);
+    window.removeEventListener('deviceorientation', capture);
+    const az = e.alpha != null ? Math.round((e.alpha + 360) % 360) : null;
+    const pl = e.beta  != null ? Math.round(Math.abs(e.beta))      : null;
+    if (az != null) { const el=document.getElementById('f-orientation'); if(el) el.value=az; }
+    if (pl != null) { const el=document.getElementById('f-plunge');      if(el) el.value=pl; }
+    showToast('🧭 Bearing ' + (az??'–') + '°  Plunge ' + (pl??'–') + '°');
+  };
+  window.addEventListener('deviceorientationabsolute', capture);
+  window.addEventListener('deviceorientation', capture);
+  setTimeout(() => {
+    if (!captured) {
+      captured = true;
+      window.removeEventListener('deviceorientationabsolute', capture);
+      window.removeEventListener('deviceorientation', capture);
+      showToast('⚠️ Sensor unavailable');
+    }
+  }, 3000);
+}
+
 async function savePhotoToDevice(){
   const pid=(currentEntry.photoIds||[])[viewingPhotoIdx]; if(!pid) return;
   const p=await dbGet('photos',pid); if(!p) return;

@@ -431,6 +431,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text'
   <img id="pv-img" src="" alt="">
   <div class="pv-actions">
     <button class="pv-btn" style="background:rgba(255,255,255,.15);color:#fff" onclick="closePV()">Close</button>
+    <button class="pv-btn" style="background:rgba(39,174,96,.85);color:#fff" onclick="savePhotoToDevice()">💾 Save to Device</button>
     <button class="pv-btn" style="background:rgba(192,57,43,.75);color:#fff" onclick="deleteViewedPhoto()">🗑 Delete</button>
   </div>
 </div>
@@ -1318,12 +1319,7 @@ async function handlePhotos(e) {
     currentEntry.photoIds.push(id);
   }
   e.target.value=''; renderPhotoGrid();
-  showToast(`📷 ${files.length} photo(s) added`);
-  // Save to device — iOS share sheet lets user tap "Save Image" to Photos
-  if(files.length && navigator.canShare?.({files})) {
-    try { await navigator.share({files, title:'WDC Field Photo'}); }
-    catch(_){} // dismissed or not supported — photo still saved in app
-  }
+  showToast(`📷 ${files.length} photo(s) added — tap a photo to save to device`);
 }
 const fileToDataUrl=f=>new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(f);});
 async function viewPhoto(idx){
@@ -1331,6 +1327,21 @@ async function viewPhoto(idx){
   viewingPhotoIdx=idx; document.getElementById('pv-img').src=p.dataUrl; document.getElementById('photo-viewer').classList.add('open');
 }
 function closePV(){document.getElementById('photo-viewer').classList.remove('open');viewingPhotoIdx=-1;}
+async function savePhotoToDevice(){
+  const pid=(currentEntry.photoIds||[])[viewingPhotoIdx]; if(!pid) return;
+  const p=await dbGet('photos',pid); if(!p) return;
+  // Convert dataURL back to File for sharing
+  const res=await fetch(p.dataUrl);
+  const blob=await res.blob();
+  const file=new File([blob], p.name||'wdc-photo.jpg', {type:blob.type||'image/jpeg'});
+  if(navigator.canShare?.({files:[file]})){
+    try{ await navigator.share({files:[file], title:'WDC Field Photo'}); }
+    catch(_){}
+  } else {
+    // Fallback: open image in new tab so user can long-press save
+    window.open(p.dataUrl,'_blank');
+  }
+}
 async function deleteViewedPhoto(){
   if(viewingPhotoIdx<0||!confirm('Delete this photo?')) return;
   await dbDel('photos',currentEntry.photoIds[viewingPhotoIdx]);

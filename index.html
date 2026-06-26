@@ -1859,14 +1859,26 @@ async function populateOccurrenceForm(occ) {
     `).join('');
   }
 
-  // Load photos
-  const { data: photos } = await withTimeout(sb.from('media').select('*').eq('occurrence_id', occ.occurrence_id || occ.id).order('sequence_number'));
-  if (photos && photos.length > 0) {
-    const grid = document.getElementById('photo-grid');
-    for (const ph of photos) {
-      const { data: urlData, error: urlErr } = await sb.storage.from('media').createSignedUrl(ph.storage_path, 3600);
-      if (urlErr || !urlData?.signedUrl) continue;
-      addPhotoThumb(urlData.signedUrl, ph.sequence_number, null, true, ph.filename);
+  // Load photos — prefer local IndexedDB, fall back to signed URLs for anything not on device
+  const occId = occ.id || occ.occurrence_id;
+  const idbPhotos = await getAllPhotosIDB();
+  const localPhotos = idbPhotos.filter(p => p.occurrenceId === occId);
+
+  if (localPhotos.length > 0) {
+    // Render from device storage — no network needed
+    localPhotos.sort((a, b) => a.seq - b.seq);
+    for (const p of localPhotos) {
+      addPhotoThumb(p.dataUrl, p.seq, null, true, p.filename);
+    }
+  } else {
+    // Not on this device — fetch signed URLs from Supabase
+    const { data: photos } = await withTimeout(sb.from('media').select('*').eq('occurrence_id', occId).order('sequence_number'));
+    if (photos && photos.length > 0) {
+      for (const ph of photos) {
+        const { data: urlData, error: urlErr } = await sb.storage.from('media').createSignedUrl(ph.storage_path, 3600);
+        if (urlErr || !urlData?.signedUrl) continue;
+        addPhotoThumb(urlData.signedUrl, ph.sequence_number, null, true, ph.filename);
+      }
     }
   }
 }

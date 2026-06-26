@@ -84,7 +84,6 @@
     transition: background .3s;
   }
   #online-badge.online { background: var(--success); }
-  #online-badge.pending { background: var(--warn); }
   #header-user { font-size: .78rem; color: rgba(255,255,255,0.65); max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* ── MAIN CONTENT ── */
@@ -956,12 +955,31 @@ let currentOccurrenceGPS = null;
 let compassPermissionGranted = false;
 let pendingPhotos = []; // [{dataUrl, filename, file}]
 let radialPointCount = 0;
+let lastSupabaseOk = true; // tracks whether last Supabase call succeeded
 
 // ════════════════════════════════════════════════════════════
 //  OFFLINE QUEUE
 // ════════════════════════════════════════════════════════════
 const QUEUE_KEY = 'wdc_offline_queue';
 const IDBNAME = 'wdc-field-photos';
+const NETWORK_TIMEOUT_MS = 8000; // fall back to local data after 8s
+
+// Race a Supabase promise against a timeout; resolves to {data,error} either way
+// Updates lastSupabaseOk so the badge reflects actual connectivity
+function withTimeout(supabasePromise, ms = NETWORK_TIMEOUT_MS) {
+  return Promise.race([
+    supabasePromise,
+    new Promise(resolve => setTimeout(() => resolve({ data: null, error: { message: 'timeout', isTimeout: true } }), ms))
+  ]).then(result => {
+    if (result?.error?.isTimeout) {
+      lastSupabaseOk = false;
+    } else if (!result?.error) {
+      lastSupabaseOk = true;
+    }
+    updateOnlineBadge();
+    return result;
+  });
+}
 
 function getQueue() {
   try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); } catch { return []; }
@@ -1030,16 +1048,12 @@ async function getAllPhotosIDB() {
 // ════════════════════════════════════════════════════════════
 function updateOnlineBadge() {
   const badge = document.getElementById('online-badge');
-  const q = getQueue();
-  if (!navigator.onLine) {
-    badge.className = '';
-    badge.title = 'Offline';
-  } else if (q.length > 0) {
-    badge.className = 'pending';
-    badge.title = `Online — ${q.length} items pending sync`;
-  } else {
+  if (navigator.onLine && lastSupabaseOk) {
     badge.className = 'online';
-    badge.title = 'Online — all synced';
+    badge.title = 'Connected';
+  } else {
+    badge.className = '';
+    badge.title = navigator.onLine ? 'Supabase unreachable' : 'Offline';
   }
   updateSettingsQueue();
 }
@@ -1332,8 +1346,17 @@ function getChips(containerId) {
 //  LOCATIONS
 // ════════════════════════════════════════════════════════════
 async function loadLocationsCache() {
-  const { data } = await sb.from('locations').select('*').eq('is_archived', false).order('site_code');
-  locationsCache = data || [];
+  const { data, error } = await withTimeout(sb.from('locations').select('*').eq('is_archived', false).order('site_code'));
+  if (error?.isTimeout) {
+    showToast('Offline — showing cached sites');
+    // locationsCache already holds last-known data; just re-render
+  } else {
+    locationsCache = data || [];
+    localStorage.setItem('wdc_sites_cache', JSON.stringify(locationsCache));
+  }
+  if (!locationsCache.length) {
+    try { locationsCache = JSON.parse(localStorage.getItem('wdc_sites_cache') || '[]'); } catch {}
+  }
   // Restore active site from localStorage, validate it still exists
   const saved = localStorage.getItem('wdc_active_site');
   activeSiteId = (saved && locationsCache.find(l => l.id === saved)) ? saved : null;
@@ -1524,22 +1547,40 @@ async function loadOccurrences() {
     return;
   }
   container.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
-  let query = sb.from('occurrences').select('*, locations(site_code, site_name)').order('created_at', { ascending: false }).limit(100);
-  query = query.eq('location_id', activeSiteId);
-  const { data, error } = await query;
+  const { data, error } = await withTimeout(
+    sb.from('occurrences').select('*, locations(site_code, site_name)').eq('location_id', activeSiteId).order('created_at', { ascending: false }).limit(100)
+  );
+  if (error?.isTimeout) {
+    // Fall back to offline queue items for this site
+    const queued = getQueue()
+      .filter(q => q.table === 'occurrences' && q.data.location_id === activeSiteId)
+      .map(q => q.data);
+    if (queued.length) {
+      showToast('Offline — showing unsynced specimens');
+      renderOccurrenceCards(queued);
+    } else {
+      container.innerHTML = '<div class="empty-state"><p>Offline — no cached specimens for this site.</p></div>';
+    }
+    return;
+  }
   if (error) { container.innerHTML = `<div class="error-msg">Error loading specimens: ${error.message}</div>`; return; }
   const items = data || [];
   if (items.length === 0) {
     container.innerHTML = '<div class="empty-state"><p>No specimens yet. Tap + to record the first find.</p></div>';
     return;
   }
+  renderOccurrenceCards(items);
+}
+
+function renderOccurrenceCards(items) {
+  const container = document.getElementById('specimens-list');
   container.innerHTML = items.map(occ => `
-    <div class="card" onclick="openOccurrenceForm('${occ.occurrence_id || occ.id}')">
+    <div class="card" onclick="openOccurrenceForm('${occ.id}')">
       <div class="card-row">
         <div style="flex:1;min-width:0;">
           <div class="card-title">${occ.catalog_number || '—'}</div>
           <div class="card-sub">${occ.scientific_name || 'Unidentified'} ${occ.verbatim_element ? '· '+occ.verbatim_element : ''}</div>
-          <div class="card-meta">${fmtDate(occ.event_date)} ${occ.locations ? '· '+occ.locations.site_code : ''}</div>
+          <div class="card-meta">${fmtDate(occ.event_date)}${occ.locations ? ' · '+occ.locations.site_code : ''}</div>
         </div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;margin-top:3px;"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -1677,11 +1718,24 @@ function openOccurrenceForm(occurrenceId) {
 
 async function loadOccurrenceIntoForm(occId) {
   showLoading('Loading specimen…');
-  const { data: occ, error } = await sb.from('occurrences').select('*, locations(*)').eq('occurrence_id', occId).single()
-    .catch(() => sb.from('occurrences').select('*, locations(*)').eq('id', occId).single());
+  const { data: occ, error } = await withTimeout(sb.from('occurrences').select('*, locations(*)').eq('id', occId).single());
   hideLoading();
+  if (error?.isTimeout) {
+    // Try to find in offline queue
+    const queued = getQueue().find(q => q.table === 'occurrences' && q.localId === occId);
+    if (queued) {
+      showToast('Offline — loading unsynced data');
+      populateOccurrenceForm(queued.data);
+      return;
+    }
+    showToast('Offline — specimen not in local cache');
+    return;
+  }
   if (error || !occ) { showToast('Could not load specimen'); return; }
+  populateOccurrenceForm(occ);
+}
 
+async function populateOccurrenceForm(occ) {
   document.getElementById('occ-form-title').textContent = occ.catalog_number || 'Edit Specimen';
   document.getElementById('occ-catalog-display').textContent = occ.catalog_number || '—';
   document.getElementById('occ-catalog-number').value = occ.catalog_number || '';
@@ -1758,7 +1812,7 @@ async function loadOccurrenceIntoForm(occId) {
   }
 
   // Load custody events
-  const { data: custody } = await sb.from('custody_events').select('*').eq('occurrence_id', occ.occurrence_id || occ.id).order('created_at');
+  const { data: custody } = await withTimeout(sb.from('custody_events').select('*').eq('occurrence_id', occ.occurrence_id || occ.id).order('created_at'));
   if (custody && custody.length > 0) {
     document.getElementById('custody-section').style.display = 'block';
     document.getElementById('custody-list').innerHTML = custody.map(c => `
@@ -1770,7 +1824,7 @@ async function loadOccurrenceIntoForm(occId) {
   }
 
   // Load photos
-  const { data: photos } = await sb.from('media').select('*').eq('occurrence_id', occ.occurrence_id || occ.id).order('sequence_number');
+  const { data: photos } = await withTimeout(sb.from('media').select('*').eq('occurrence_id', occ.occurrence_id || occ.id).order('sequence_number'));
   if (photos && photos.length > 0) {
     const grid = document.getElementById('photo-grid');
     for (const ph of photos) {

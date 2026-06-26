@@ -672,11 +672,25 @@
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Bone Missing %</label>
-              <input type="text" id="occ-bone-missing" class="form-input" placeholder="0–100" inputmode="decimal">
+              <select id="occ-bone-missing" class="form-select">
+                <option value="">—</option>
+                <option>0%</option><option>5%</option><option>10%</option><option>15%</option><option>20%</option>
+                <option>25%</option><option>30%</option><option>35%</option><option>40%</option><option>45%</option>
+                <option>50%</option><option>55%</option><option>60%</option><option>65%</option><option>70%</option>
+                <option>75%</option><option>80%</option><option>85%</option><option>90%</option><option>95%</option>
+                <option>100%</option>
+              </select>
             </div>
             <div class="form-group">
               <label class="form-label">Pre-Depositional %</label>
-              <input type="text" id="occ-pre-dep-pct" class="form-input" placeholder="0–100" inputmode="decimal">
+              <select id="occ-pre-dep-pct" class="form-select">
+                <option value="">—</option>
+                <option>0%</option><option>5%</option><option>10%</option><option>15%</option><option>20%</option>
+                <option>25%</option><option>30%</option><option>35%</option><option>40%</option><option>45%</option>
+                <option>50%</option><option>55%</option><option>60%</option><option>65%</option><option>70%</option>
+                <option>75%</option><option>80%</option><option>85%</option><option>90%</option><option>95%</option>
+                <option>100%</option>
+              </select>
             </div>
           </div>
           <div class="form-group" style="margin-top:12px;">
@@ -688,7 +702,11 @@
             <div class="chip-group" id="chips-current-cond"></div>
           </div>
           <div class="form-group" style="margin-top:12px;">
-            <label class="form-label">Preparations</label>
+            <label class="form-label">Chemicals Applied</label>
+            <div class="chip-group" id="chips-chemicals"></div>
+          </div>
+          <div class="form-group" style="margin-top:12px;">
+            <label class="form-label">Preparations / Packaging</label>
             <div class="chip-group" id="chips-preparations"></div>
           </div>
         </div>
@@ -1234,8 +1252,9 @@ function getToggle(groupId) {
 // ════════════════════════════════════════════════════════════
 //  CHIP GROUPS
 // ════════════════════════════════════════════════════════════
-const CONDITION_OPTIONS = ['Weathered','Abraded','Broken','Distorted','Compressed','Encrusted','Pyritized','Other'];
-const PREP_OPTIONS = ['Paraloid B-72','Vinac','Butvar','Plaster','Foam','Tissue','Other'];
+const CONDITION_OPTIONS = ['Unbroken','Broken','Shattered','Weathered','Abraded','Eroded','Distorted','Compressed','Encrusted','Oxidized','Pyritized','Pathologic','Other'];
+const CHEMICALS_OPTIONS = ['None','Thin Cyano','Thick Cyano','Accelerator','Paraloid B-72','Acetone'];
+const PREP_OPTIONS = ['Plaster','Foam','Tissue','Vinac','Butvar','Other'];
 
 // ── Paleontological reference data ──────────────────────────
 const PALEO_DATA = {
@@ -1642,6 +1661,7 @@ function openOccurrenceForm(occurrenceId) {
   // Build chip groups
   buildChips('chips-pre-dep', CONDITION_OPTIONS);
   buildChips('chips-current-cond', CONDITION_OPTIONS);
+  buildChips('chips-chemicals', CHEMICALS_OPTIONS);
   buildChips('chips-preparations', PREP_OPTIONS);
 
   // Reset toggles
@@ -1765,6 +1785,7 @@ async function populateOccurrenceForm(occ) {
   document.getElementById('occ-pre-dep-pct').value = occ.pre_depositional_pct || '';
   buildChips('chips-pre-dep', CONDITION_OPTIONS, occ.pre_depositional_condition || []);
   buildChips('chips-current-cond', CONDITION_OPTIONS, occ.current_condition || []);
+  buildChips('chips-chemicals', CHEMICALS_OPTIONS, occ.chemicals_applied || []);
   buildChips('chips-preparations', PREP_OPTIONS, occ.preparations || []);
   document.getElementById('occ-orientation').value = occ.orientation_degrees ?? '';
   document.getElementById('occ-plunge').value = occ.plunge_degrees ?? '';
@@ -2132,6 +2153,7 @@ async function saveOccurrence() {
     pre_depositional_pct: document.getElementById('occ-pre-dep-pct').value || null,
     pre_depositional_condition: getChips('chips-pre-dep'),
     current_condition: getChips('chips-current-cond'),
+    chemicals_applied: getChips('chips-chemicals'),
     preparations: getChips('chips-preparations'),
     orientation_degrees: parseFloat(document.getElementById('occ-orientation').value) || null,
     plunge_degrees: parseFloat(document.getElementById('occ-plunge').value) || null,

@@ -262,13 +262,18 @@
   .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
   .photo-thumb {
     position: relative; aspect-ratio: 1; border-radius: var(--radius-sm);
-    overflow: hidden; background: var(--card2);
+    overflow: hidden; background: var(--card2); cursor: pointer;
   }
   .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
   .photo-seq {
     position: absolute; bottom: 4px; left: 4px;
     background: rgba(0,0,0,.7); color: var(--accent); font-size: .65rem;
     padding: 2px 5px; border-radius: 3px; font-weight: 700;
+  }
+  .photo-saved-badge {
+    position: absolute; bottom: 4px; right: 4px;
+    background: rgba(39,174,96,.85); color: #fff; font-size: .6rem;
+    font-weight: 900; padding: 2px 5px; border-radius: 3px; line-height: 1;
   }
   .photo-del {
     position: absolute; top: 4px; right: 4px;
@@ -277,6 +282,24 @@
     cursor: pointer; display: flex; align-items: center; justify-content: center;
   }
   .photo-actions { display: flex; gap: 10px; margin-top: 8px; }
+  /* Lightbox */
+  #lightbox {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,.92); flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox-img { max-width: 100%; max-height: calc(100vh - 80px); object-fit: contain; border-radius: 4px; }
+  #lightbox-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 16px; padding: 14px;
+    background: rgba(0,0,0,.5);
+  }
+  #lightbox-close {
+    position: absolute; top: 14px; right: 18px;
+    background: none; border: none; color: #fff; font-size: 2rem;
+    cursor: pointer; line-height: 1;
+  }
 
   /* ── MISC ── */
   .error-msg { color: var(--danger); font-size: .85rem; padding: 8px 12px; background: rgba(231,76,60,.1); border-radius: var(--radius-sm); border: 1px solid rgba(231,76,60,.3); }
@@ -1842,7 +1865,7 @@ async function populateOccurrenceForm(occ) {
     const grid = document.getElementById('photo-grid');
     for (const ph of photos) {
       const { data: urlData } = sb.storage.from('media').getPublicUrl(ph.storage_path);
-      addPhotoThumb(urlData.publicUrl, ph.sequence_number, null, true);
+      addPhotoThumb(urlData.publicUrl, ph.sequence_number, null, true, ph.filename);
     }
   }
 }
@@ -2012,13 +2035,15 @@ async function handlePhotoSelected(event) {
   }
 }
 
-function addPhotoThumb(src, seq, pendingIdx, readonly) {
+function addPhotoThumb(src, seq, pendingIdx, readonly, filename) {
   const grid = document.getElementById('photo-grid');
   const div = document.createElement('div');
   div.className = 'photo-thumb';
+  const fname = filename || `photo-${pad3(seq)}.jpg`;
   div.innerHTML = `
-    <img src="${src}" alt="Photo ${seq}" loading="lazy">
+    <img src="${src}" alt="Photo ${seq}" loading="lazy" onclick="openLightbox('${src}','${fname}')">
     <div class="photo-seq">${pad3(seq)}</div>
+    ${readonly ? `<div class="photo-saved-badge">S</div>` : ''}
     ${!readonly ? `<button class="photo-del" onclick="removePhoto(${pendingIdx}, this.closest('.photo-thumb'))">×</button>` : ''}
   `;
   grid.appendChild(div);
@@ -2309,6 +2334,51 @@ async function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ════════════════════════════════════════════════════════════
+//  LIGHTBOX
+// ════════════════════════════════════════════════════════════
+let lightboxSrc = null;
+let lightboxFilename = 'photo.jpg';
+
+function openLightbox(src, filename) {
+  lightboxSrc = src;
+  lightboxFilename = filename || 'photo.jpg';
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-img').src = '';
+  lightboxSrc = null;
+}
+
+async function downloadLightboxPhoto() {
+  if (!lightboxSrc) return;
+  try {
+    const blob = await fetch(lightboxSrc).then(r => r.blob());
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = lightboxFilename;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) {
+    showToast('Could not download photo');
+  }
+}
 </script>
+
+<!-- Lightbox overlay -->
+<div id="lightbox" onclick="if(event.target===this)closeLightbox()">
+  <button id="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lightbox-img" src="" alt="Photo">
+  <div id="lightbox-bar">
+    <button class="btn btn-primary" onclick="downloadLightboxPhoto()">Save to Device</button>
+    <button class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.3);" onclick="closeLightbox()">Close</button>
+  </div>
+</div>
+
 </body>
 </html>

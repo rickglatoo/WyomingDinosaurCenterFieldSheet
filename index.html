@@ -1656,10 +1656,17 @@ function openOccurrenceForm(occurrenceId) {
     document.getElementById('occ-lat').value = '';
     document.getElementById('occ-lng').value = '';
     document.getElementById('occ-verbatim-coords').value = '';
-    // Set site from active selection
+    // Set site from active selection and auto-generate catalog number
     document.getElementById('occ-location-id').value = activeSiteId || '';
     const activeLoc = locationsCache.find(l => l.id === activeSiteId);
     document.getElementById('occ-site-display').textContent = activeLoc ? `${activeLoc.site_code}${activeLoc.site_name ? ' — '+activeLoc.site_name : ''}` : '—';
+    if (activeSiteId) {
+      document.getElementById('occ-catalog-display').textContent = 'Generating…';
+      generateCatalogNumber(activeSiteId).then(catNum => {
+        document.getElementById('occ-catalog-number').value = catNum || '';
+        document.getElementById('occ-catalog-display').textContent = catNum || '—';
+      });
+    }
     // Add first radial point
     addRadialPoint();
   } else {
@@ -2051,6 +2058,7 @@ async function saveOccurrence() {
   const occId = editingOccurrenceId || genUUID();
 
   const data = {
+    id: occId,
     occurrence_id: occId,
     institution_code: 'WDC',
     collection_code: 'PALEO',
@@ -2158,14 +2166,14 @@ async function flushQueue() {
     try {
       let err;
       if (item.action === 'upsert') {
-        const { error } = await sb.from(item.table).upsert(item.data, { onConflict: item.table === 'occurrences' ? 'occurrence_id' : 'id' });
+        const { error } = await sb.from(item.table).upsert(item.data, { onConflict: 'id' });
         err = error;
       }
       if (!err) {
         dequeue(item.localId);
         // Update sync_status
         if (item.table === 'occurrences') {
-          await sb.from('occurrences').update({ sync_status: 'synced' }).eq('occurrence_id', item.localId);
+          await sb.from('occurrences').update({ sync_status: 'synced' }).eq('id', item.localId);
         }
       }
     } catch (e) { /* skip this item */ }

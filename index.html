@@ -487,6 +487,9 @@
           Save Site
         </button>
       </div>
+      <div id="delete-site-row" style="display:none;margin-top:8px;">
+        <button class="btn btn-danger btn-full" id="delete-site-btn" onclick="deleteSite()">Delete Site</button>
+      </div>
     </div>
 
     <!-- OCCURRENCE FORM VIEW -->
@@ -522,11 +525,10 @@
           <span class="section-chevron open" id="chevron-discovery">›</span>
         </div>
         <div class="section-body open" id="body-discovery">
+          <input type="hidden" id="occ-location-id">
           <div class="form-group">
-            <label class="form-label">Site *</label>
-            <select id="occ-location-id" class="form-select" onchange="onLocationChange()">
-              <option value="">— select site —</option>
-            </select>
+            <label class="form-label">Site</label>
+            <div class="readonly-field" id="occ-site-display">—</div>
           </div>
           <div class="form-row" style="margin-top:12px;">
             <div class="form-group">
@@ -546,6 +548,52 @@
         <hr class="section-divider">
       </div>
 
+      <!-- GEOLOGIC CONTEXT -->
+      <div class="form-section">
+        <div class="section-header" onclick="toggleSection('geologic')">
+          <span class="section-title">Geologic Context</span>
+          <span class="section-chevron open" id="chevron-geologic">›</span>
+        </div>
+        <div class="section-body open" id="body-geologic">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Formation</label>
+              <select id="occ-formation" class="form-select" onchange="onFormationChange()">
+                <option value="">— select —</option>
+                <option value="Morrison">Morrison</option>
+                <option value="Lance">Lance</option>
+                <option value="Hell Creek">Hell Creek</option>
+                <option value="Cloverly">Cloverly</option>
+                <option value="Frontier">Frontier</option>
+                <option value="Mowry">Mowry</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Epoch</label>
+              <select id="occ-epoch" class="form-select" onchange="onEpochChange()">
+                <option value="">— select formation —</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:12px;">
+            <div class="form-group">
+              <label class="form-label">Member</label>
+              <input type="text" id="occ-member" class="form-input" placeholder="e.g. Brushy Basin">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bed</label>
+              <input type="text" id="occ-bed" class="form-input" placeholder="Bed designation">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:12px;">
+            <label class="form-label">Lithologic Description</label>
+            <textarea id="occ-litho" class="form-textarea" placeholder="Describe the lithology at point of discovery..."></textarea>
+          </div>
+        </div>
+        <hr class="section-divider">
+      </div>
+
       <!-- IDENTIFICATION -->
       <div class="form-section">
         <div class="section-header" onclick="toggleSection('identification')">
@@ -555,11 +603,35 @@
         <div class="section-body" id="body-identification">
           <div class="form-group">
             <label class="form-label">Scientific Name</label>
-            <input type="text" id="occ-scientific-name" class="form-input" placeholder="e.g. Allosaurus fragilis">
+            <select id="occ-scientific-name" class="form-select" onchange="onTaxonChange()">
+              <option value="">— select formation + epoch first —</option>
+            </select>
+            <input type="text" id="occ-taxon-other" class="form-input" placeholder="Enter scientific name…" style="display:none;margin-top:8px;">
           </div>
           <div class="form-group" style="margin-top:12px;">
             <label class="form-label">Verbatim Element</label>
-            <input type="text" id="occ-verbatim-element" class="form-input" placeholder="e.g. femur, rib, vertebra">
+            <select id="occ-verbatim-element" class="form-select" onchange="onElementChange()">
+              <option value="">— select —</option>
+              <option>Atlas</option><option>Axis</option><option>Astragalus</option>
+              <option>Calcaneum</option><option>Carpal</option>
+              <option>Caudal vertebra</option><option>Cervical vertebra</option>
+              <option>Chevron</option><option>Coracoid</option><option>Cranium</option>
+              <option>Dorsal vertebra</option><option>Femur</option><option>Fibula</option>
+              <option>Frontal</option><option>Gastralia</option><option>Humerus</option>
+              <option>Ilium</option><option>Ischium</option><option>Jugal</option>
+              <option>Lacrimal</option><option>Mandible</option>
+              <option>Manual phalanx</option><option>Manual ungual</option>
+              <option>Maxilla</option><option>Metacarpal</option><option>Metatarsal</option>
+              <option>Nasal</option><option>Osteoderm</option><option>Parietal</option>
+              <option>Pedal phalanx</option><option>Pedal ungual</option>
+              <option>Premaxilla</option><option>Pubis</option><option>Quadrate</option>
+              <option>Radius</option><option>Rib</option>
+              <option>Sacral vertebra</option><option>Scapula</option>
+              <option>Squamosal</option><option>Sternal plate</option>
+              <option>Tarsal</option><option>Teeth</option><option>Tibia</option>
+              <option>Ulna</option><option>Indeterminate</option><option>Other</option>
+            </select>
+            <input type="text" id="occ-element-other" class="form-input" placeholder="Describe element…" style="display:none;margin-top:8px;">
           </div>
           <div class="form-group" style="margin-top:12px;">
             <label class="form-label">Element Side</label>
@@ -675,41 +747,6 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             Add Point
           </button>
-        </div>
-        <hr class="section-divider">
-      </div>
-
-      <!-- GEOLOGIC CONTEXT -->
-      <div class="form-section">
-        <div class="section-header" onclick="toggleSection('geologic')">
-          <span class="section-title">Geologic Context</span>
-          <span class="section-chevron" id="chevron-geologic">›</span>
-        </div>
-        <div class="section-body" id="body-geologic">
-          <div class="form-group">
-            <label class="form-label">Lithologic Description</label>
-            <textarea id="occ-litho" class="form-textarea" placeholder="Describe the lithology at point of discovery..."></textarea>
-          </div>
-          <div class="form-row" style="margin-top:12px;">
-            <div class="form-group">
-              <label class="form-label">Formation</label>
-              <input type="text" id="occ-formation" class="form-input" placeholder="e.g. Morrison">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Member</label>
-              <input type="text" id="occ-member" class="form-input" placeholder="e.g. Brushy Basin">
-            </div>
-          </div>
-          <div class="form-row" style="margin-top:12px;">
-            <div class="form-group">
-              <label class="form-label">Bed</label>
-              <input type="text" id="occ-bed" class="form-input" placeholder="Bed designation">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Earliest Epoch</label>
-              <input type="text" id="occ-epoch" class="form-input" placeholder="e.g. Late Jurassic">
-            </div>
-          </div>
         </div>
         <hr class="section-divider">
       </div>
@@ -1186,6 +1223,96 @@ function getToggle(groupId) {
 const CONDITION_OPTIONS = ['Weathered','Abraded','Broken','Distorted','Compressed','Encrusted','Pyritized','Other'];
 const PREP_OPTIONS = ['Paraloid B-72','Vinac','Butvar','Plaster','Foam','Tissue','Other'];
 
+// ── Paleontological reference data ──────────────────────────
+const PALEO_DATA = {
+  Morrison: {
+    epochs: ['Late Jurassic'],
+    'Late Jurassic': ['Allosaurus fragilis','Apatosaurus ajax','Apatosaurus louisae','Barosaurus lentus',
+      'Brachiosaurus altithorax','Brontosaurus excelsus','Camarasaurus grandis','Camarasaurus lentus',
+      'Camptosaurus dispar','Ceratosaurus nasicornis','Diplodocus carnegii','Diplodocus hallorum',
+      'Dryosaurus altus','Gargoyleosaurus parkpinorum','Haplocanthosaurus delfsi',
+      'Marshosaurus bicentesimus','Mymoorapelta maysi','Stegosaurus stenops','Stegosaurus ungulatus',
+      'Stokesosaurus clevelandi','Supersaurus vivianae','Torvosaurus tanneri','Indeterminate','Other']
+  },
+  Lance: {
+    epochs: ['Late Cretaceous'],
+    'Late Cretaceous': ['Tyrannosaurus rex','Triceratops horridus','Edmontosaurus annectens',
+      'Pachycephalosaurus wyomingensis','Ankylosaurus magniventris','Thescelosaurus neglectus',
+      'Indeterminate','Other']
+  },
+  'Hell Creek': {
+    epochs: ['Late Cretaceous'],
+    'Late Cretaceous': ['Tyrannosaurus rex','Triceratops horridus','Triceratops prorsus',
+      'Edmontosaurus regalis','Ankylosaurus magniventris','Pachycephalosaurus wyomingensis',
+      'Indeterminate','Other']
+  },
+  Cloverly: {
+    epochs: ['Early Cretaceous'],
+    'Early Cretaceous': ['Tenontosaurus tilletti','Deinonychus antirrhopus',
+      'Sauroposeidon proteles','Acrocanthosaurus atokensis','Indeterminate','Other']
+  },
+  Frontier: { epochs: ['Late Cretaceous'], 'Late Cretaceous': ['Indeterminate','Other'] },
+  Mowry:    { epochs: ['Early Cretaceous'], 'Early Cretaceous': ['Indeterminate','Other'] },
+  Other:    { epochs: ['Other'], 'Other': ['Indeterminate','Other'] }
+};
+
+function onFormationChange() {
+  const formation = document.getElementById('occ-formation').value;
+  const epochSel = document.getElementById('occ-epoch');
+  const fd = PALEO_DATA[formation];
+  if (fd) {
+    epochSel.innerHTML = '<option value="">— select —</option>' +
+      fd.epochs.map(e => `<option value="${e}">${e}</option>`).join('');
+    if (fd.epochs.length === 1) { epochSel.value = fd.epochs[0]; onEpochChange(); }
+  } else {
+    epochSel.innerHTML = '<option value="">— select formation —</option>';
+    resetTaxaSelect();
+  }
+}
+
+function onEpochChange() {
+  const formation = document.getElementById('occ-formation').value;
+  const epoch = document.getElementById('occ-epoch').value;
+  const taxa = PALEO_DATA[formation]?.[epoch] || [];
+  const sel = document.getElementById('occ-scientific-name');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— select —</option>' +
+    taxa.map(t => `<option value="${t}">${t}</option>`).join('');
+  if (taxa.includes(cur)) sel.value = cur;
+  document.getElementById('occ-taxon-other').style.display = 'none';
+}
+
+function resetTaxaSelect() {
+  const sel = document.getElementById('occ-scientific-name');
+  sel.innerHTML = '<option value="">— select formation + epoch first —</option>';
+  document.getElementById('occ-taxon-other').style.display = 'none';
+}
+
+function onTaxonChange() {
+  const val = document.getElementById('occ-scientific-name').value;
+  document.getElementById('occ-taxon-other').style.display = val === 'Other' ? 'block' : 'none';
+}
+
+function onElementChange() {
+  const val = document.getElementById('occ-verbatim-element').value;
+  document.getElementById('occ-element-other').style.display = val === 'Other' ? 'block' : 'none';
+}
+
+// Set a select value, falling back to 'Other' + populating other-input if not found
+function setSelectOrOther(selectId, otherId, value) {
+  if (!value) return;
+  const sel = document.getElementById(selectId);
+  const opts = Array.from(sel.options).map(o => o.value);
+  if (opts.includes(value)) {
+    sel.value = value;
+  } else {
+    sel.value = 'Other';
+    const other = document.getElementById(otherId);
+    other.value = value;
+    other.style.display = 'block';
+  }
+}
+
 function buildChips(containerId, options, selected=[]) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
@@ -1205,7 +1332,7 @@ function getChips(containerId) {
 //  LOCATIONS
 // ════════════════════════════════════════════════════════════
 async function loadLocationsCache() {
-  const { data } = await sb.from('locations').select('*').order('site_code');
+  const { data } = await sb.from('locations').select('*').eq('is_archived', false).order('site_code');
   locationsCache = data || [];
   // Restore active site from localStorage, validate it still exists
   const saved = localStorage.getItem('wdc_active_site');
@@ -1240,9 +1367,8 @@ function renderSitesList() {
           : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;margin-top:3px;"><polyline points="9 18 15 12 9 6"/></svg>`
         }
       </div>
-      ${isActive ? `<div style="margin-top:8px;display:flex;gap:8px;">
+      ${isActive ? `<div style="margin-top:8px;">
         <button class="btn btn-ghost btn-sm" style="font-size:.78rem;" onclick="event.stopPropagation();openLocationForm('${loc.id}')">Edit Site</button>
-        <button class="btn btn-danger btn-sm" style="font-size:.78rem;margin-left:auto;" onclick="event.stopPropagation();deleteSite('${loc.id}','${loc.site_code}')">Delete Site</button>
       </div>` : ''}
     </div>`;
   }).join('');
@@ -1258,10 +1384,23 @@ function selectSite(id) {
   if (title) title.textContent = site ? `Specimens — ${site.site_code}` : 'Specimens';
 }
 
-async function deleteSite(id, code) {
-  if (!confirm(`Delete site "${code}"? This cannot be undone. Any specimens linked to this site will lose their site reference.`)) return;
-  const { error } = await sb.from('locations').delete().eq('id', id);
-  if (error) { showToast('Error deleting site: ' + error.message); return; }
+async function deleteSite() {
+  const id = editingLocationId;
+  const loc = locationsCache.find(l => l.id === id);
+  if (!loc) return;
+  // Check for linked specimens
+  const { count } = await sb.from('occurrences').select('id', { count: 'exact', head: true }).eq('location_id', id);
+  let msg, action;
+  if (count > 0) {
+    msg = `Site "${loc.site_code}" has ${count} specimen(s). It will be hidden from the app but all data will be preserved. Hide it?`;
+    action = async () => sb.from('locations').update({ is_archived: true }).eq('id', id);
+  } else {
+    msg = `Delete site "${loc.site_code}"? It has no specimens and will be permanently removed.`;
+    action = async () => sb.from('locations').delete().eq('id', id);
+  }
+  if (!confirm(msg)) return;
+  const { error } = await action();
+  if (error) { showToast('Error: ' + error.message); return; }
   if (activeSiteId === id) {
     activeSiteId = null;
     localStorage.removeItem('wdc_active_site');
@@ -1269,7 +1408,8 @@ async function deleteSite(id, code) {
     if (title) title.textContent = 'Specimens';
   }
   await loadLocationsCache();
-  showToast('Site deleted');
+  showView('sites');
+  showToast(count > 0 ? 'Site hidden' : 'Site deleted');
 }
 
 function populateLocationDropdowns() {
@@ -1287,6 +1427,7 @@ function openLocationForm(locId) {
   const isNew = !locId;
   document.getElementById('loc-form-title').textContent = isNew ? 'New Site' : 'Edit Site';
   document.getElementById('loc-form-error').style.display = 'none';
+  document.getElementById('delete-site-row').style.display = isNew ? 'none' : 'block';
   currentLocationGPS = null;
   document.getElementById('loc-gps-display').style.display = 'none';
 
@@ -1478,7 +1619,14 @@ function openOccurrenceForm(occurrenceId) {
     document.getElementById('occ-recorded-by').value = currentProfile?.full_name || '';
     document.getElementById('occ-intern-staff').value = '';
     document.getElementById('occ-scientific-name').value = '';
+    document.getElementById('occ-taxon-other').value = '';
+    document.getElementById('occ-taxon-other').style.display = 'none';
     document.getElementById('occ-verbatim-element').value = '';
+    document.getElementById('occ-element-other').value = '';
+    document.getElementById('occ-element-other').style.display = 'none';
+    document.getElementById('occ-formation').value = '';
+    document.getElementById('occ-epoch').innerHTML = '<option value="">— select formation —</option>';
+    resetTaxaSelect();
     document.getElementById('occ-side-l').checked = false;
     document.getElementById('occ-side-r').checked = false;
     document.getElementById('occ-element-remarks').value = '';
@@ -1508,8 +1656,10 @@ function openOccurrenceForm(occurrenceId) {
     document.getElementById('occ-lat').value = '';
     document.getElementById('occ-lng').value = '';
     document.getElementById('occ-verbatim-coords').value = '';
-    // Reset location
-    document.getElementById('occ-location-id').value = '';
+    // Set site from active selection
+    document.getElementById('occ-location-id').value = activeSiteId || '';
+    const activeLoc = locationsCache.find(l => l.id === activeSiteId);
+    document.getElementById('occ-site-display').textContent = activeLoc ? `${activeLoc.site_code}${activeLoc.site_name ? ' — '+activeLoc.site_name : ''}` : '—';
     // Add first radial point
     addRadialPoint();
   } else {
@@ -1529,11 +1679,21 @@ async function loadOccurrenceIntoForm(occId) {
   document.getElementById('occ-catalog-display').textContent = occ.catalog_number || '—';
   document.getElementById('occ-catalog-number').value = occ.catalog_number || '';
   document.getElementById('occ-location-id').value = occ.location_id || '';
+  const occLoc = occ.locations || locationsCache.find(l => l.id === occ.location_id);
+  document.getElementById('occ-site-display').textContent = occLoc ? `${occLoc.site_code}${occLoc.site_name ? ' — '+occLoc.site_name : ''}` : '—';
   document.getElementById('occ-event-date').value = occ.event_date || '';
   document.getElementById('occ-recorded-by').value = occ.recorded_by || '';
   document.getElementById('occ-intern-staff').value = occ.intern_staff || '';
-  document.getElementById('occ-scientific-name').value = occ.scientific_name || '';
-  document.getElementById('occ-verbatim-element').value = occ.verbatim_element || '';
+  // Restore formation → epoch → taxa chain first
+  const formSel = document.getElementById('occ-formation');
+  formSel.value = occ.formation || '';
+  if (occ.formation) onFormationChange();
+  if (occ.earliest_epoch_or_lowest_series) {
+    document.getElementById('occ-epoch').value = occ.earliest_epoch_or_lowest_series;
+    onEpochChange();
+  }
+  setSelectOrOther('occ-scientific-name', 'occ-taxon-other', occ.scientific_name || '');
+  setSelectOrOther('occ-verbatim-element', 'occ-element-other', occ.verbatim_element || '');
   const side = occ.element_side || '';
   document.getElementById('occ-side-l').checked = side.includes('L');
   document.getElementById('occ-side-r').checked = side.includes('R');
@@ -1550,10 +1710,8 @@ async function loadOccurrenceIntoForm(occId) {
   document.getElementById('occ-max-length').value = occ.max_length_cm ?? '';
   document.getElementById('occ-mid-width').value = occ.mid_width_cm ?? '';
   document.getElementById('occ-litho').value = occ.lithologic_description || '';
-  document.getElementById('occ-formation').value = occ.formation || '';
   document.getElementById('occ-member').value = occ.member || '';
   document.getElementById('occ-bed').value = occ.bed || '';
-  document.getElementById('occ-epoch').value = occ.earliest_epoch_or_lowest_series || '';
   document.getElementById('occ-associated').value = occ.associated_occurrences || '';
   document.getElementById('occ-remarks').value = occ.occurrence_remarks || '';
   document.getElementById('occ-date-mapped').value = occ.date_mapped || '';
@@ -1902,8 +2060,8 @@ async function saveOccurrence() {
     event_date: document.getElementById('occ-event-date').value || null,
     recorded_by: document.getElementById('occ-recorded-by').value.trim() || null,
     intern_staff: document.getElementById('occ-intern-staff').value.trim() || null,
-    scientific_name: document.getElementById('occ-scientific-name').value.trim() || null,
-    verbatim_element: document.getElementById('occ-verbatim-element').value.trim() || null,
+    scientific_name: (() => { const s = document.getElementById('occ-scientific-name').value; return s === 'Other' ? (document.getElementById('occ-taxon-other').value.trim() || null) : (s || null); })(),
+    verbatim_element: (() => { const s = document.getElementById('occ-verbatim-element').value; return s === 'Other' ? (document.getElementById('occ-element-other').value.trim() || null) : (s || null); })(),
     element_side: elementSide || null,
     element_remarks: document.getElementById('occ-element-remarks').value.trim() || null,
     in_situ: getToggle('occ-in-situ'),

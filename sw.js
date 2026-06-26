@@ -1,9 +1,9 @@
-const CACHE_NAME = 'wdc-field-v1';
+const CACHE_NAME = 'wdc-field-v5';
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(['/index.html']).catch(() => {});
+      return cache.addAll(['/index.html', '/manifest.json', '/WDC_fieldApp.png']).catch(() => {});
     })
   );
   self.skipWaiting();

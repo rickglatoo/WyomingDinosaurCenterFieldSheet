@@ -1,0 +1,29 @@
+{
+  "name": "WDC Field App",
+  "short_name": "WDC Field",
+  "description": "Wyoming Dinosaur Center field specimen collection",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1714",
+  "theme_color": "#1a1714",
+  "icons": [
+    {
+      "src": "WDC_fieldApp.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "WDC_fieldApp.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "WDC_fieldApp.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

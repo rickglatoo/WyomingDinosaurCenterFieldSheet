@@ -9,7 +9,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="WDC Field">
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiV0RDIEZpZWxkIEFwcCIsInNob3J0X25hbWUiOiJXREMgRmllbGQiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzFhMTcxNCIsInRoZW1lX2NvbG9yIjoiIzFhMTcxNCIsImljb25zIjpbeyJzcmMiOiJXRENfZmllbGRBcHAucG5nIiwic2l6ZXMiOiIzMDB4MzAwIiwidHlwZSI6ImltYWdlL3BuZyJ9XX0=">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="WDC_fieldApp.png">
+<link rel="apple-touch-icon" sizes="180x180" href="WDC_fieldApp.png">
+<link rel="apple-touch-icon" sizes="152x152" href="WDC_fieldApp.png">
+<link rel="apple-touch-icon" sizes="120x120" href="WDC_fieldApp.png">
+<link rel="icon" type="image/png" href="WDC_fieldApp.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,7 +63,7 @@
     gap: 24px; z-index: 9999;
     transition: opacity .4s;
   }
-  #splash img { width: 300px; max-width: 80vw; border-radius: 16px; }
+  #splash img { width: 300px; max-width: 72vw; border-radius: 20px; filter: drop-shadow(0 8px 32px rgba(196,168,130,0.22)); }
   #splash .splash-title { font-size: 1.3rem; color: var(--accent); letter-spacing: .1em; font-weight: 600; }
   #splash .splash-sub { font-size: .85rem; color: var(--text-dim); }
 
@@ -89,6 +94,17 @@
     -webkit-overflow-scrolling: touch;
     position: relative;
   }
+  /* Subtle watermark on all main views */
+  #main-content::before {
+    content: '';
+    position: fixed;
+    bottom: 80px; right: 16px;
+    width: min(38vw, 160px); height: min(38vw, 160px);
+    background: url('WDC_fieldApp.png') center / contain no-repeat;
+    opacity: 0.04;
+    pointer-events: none;
+    z-index: 0;
+  }
 
   /* ── BOTTOM NAV ── */
   #bottom-nav {
@@ -116,10 +132,28 @@
   #login-view {
     display: none; flex-direction: column; align-items: center; justify-content: center;
     min-height: 100vh; padding: 24px; gap: 20px;
+    position: relative; overflow: hidden;
   }
   #login-view.active { display: flex; }
-  .login-logo { width: 200px; border-radius: 12px; margin-bottom: 8px; }
-  .login-title { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+  /* Watermark behind login form */
+  #login-view::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(85vw, 420px); height: min(85vw, 420px);
+    background: url('WDC_fieldApp.png') center / contain no-repeat;
+    opacity: 0.055;
+    pointer-events: none;
+  }
+  #login-view > * { position: relative; z-index: 1; }
+  .login-logo {
+    width: 200px; max-width: 55vw;
+    border-radius: 16px;
+    margin-bottom: 4px;
+    filter: drop-shadow(0 4px 24px rgba(196,168,130,0.18));
+  }
+  .login-title { font-size: 1.5rem; font-weight: 700; color: var(--accent); letter-spacing: .05em; }
   .login-sub { font-size: .85rem; color: var(--text-dim); margin-bottom: 8px; }
   .login-form { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 12px; }
 
@@ -435,7 +469,7 @@
       <div id="loc-form-error" style="display:none;" class="error-msg"></div>
 
       <div class="form-group"><label class="form-label">Site Code *</label>
-        <input type="text" id="loc-site-code" class="form-input" placeholder="e.g. BQ-MAIN" oninput="this.value=this.value.toUpperCase()">
+        <input type="text" id="loc-site-code" class="form-input" placeholder="e.g. ABC" oninput="this.value=this.value.toUpperCase()">
       </div>
       <div class="form-group" style="margin-top:12px;"><label class="form-label">Site Name</label>
         <input type="text" id="loc-site-name" class="form-input" placeholder="Descriptive site name">
@@ -445,10 +479,10 @@
       </div>
       <div class="form-row" style="margin-top:12px;">
         <div class="form-group"><label class="form-label">Marker 1 Label</label>
-          <input type="text" id="loc-m1-label" class="form-input" placeholder="e.g. Stake A">
+          <input type="text" id="loc-m1-label" class="form-input" placeholder="e.g. N">
         </div>
         <div class="form-group"><label class="form-label">Marker 2 Label</label>
-          <input type="text" id="loc-m2-label" class="form-input" placeholder="e.g. Rock cairn">
+          <input type="text" id="loc-m2-label" class="form-input" placeholder="e.g. S">
         </div>
       </div>
       <div class="form-group" style="margin-top:12px;"><label class="form-label">Remarks</label>

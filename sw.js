@@ -1,32 +1,66 @@
-const CACHE = 'wdc-v1';
+const CACHE_NAME = 'wdc-field-v1';
 
-self.addEventListener('install', e => {
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(['/index.html']).catch(() => {});
+    })
+  );
   self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.add('index.html'))
-  );
 });
 
-self.addEventListener('activate', e => {
-  // Clean up old caches if version changes
-  e.waitUntil(
+self.addEventListener('activate', event => {
+  event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
   );
+  self.clients.claim();
 });
 
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      // Serve from cache immediately; also try to update cache in background
-      const network = fetch(e.request).then(response => {
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // Network-first for Supabase API calls
+  if (url.hostname.includes('supabase.co')) {
+    event.respondWith(
+      fetch(event.request).catch(() => new Response(JSON.stringify({ error: 'offline' }), {
+        headers: { 'Content-Type': 'application/json' }
+      }))
+    );
+    return;
+  }
+
+  // Cache-first for CDN assets
+  if (url.hostname.includes('jsdelivr.net') || url.hostname.includes('cdn.')) {
+    event.respondWith(
+      caches.match(event.request).then(cached => {
+        if (cached) return cached;
+        return fetch(event.request).then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Cache-first for app shell
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(response => {
         if (response.ok) {
-          caches.open(CACHE).then(c => c.put(e.request, response.clone()));
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => cached);
-      return cached || network;
+      }).catch(() => {
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
+      });
     })
   );
 });

@@ -1864,8 +1864,9 @@ async function populateOccurrenceForm(occ) {
   if (photos && photos.length > 0) {
     const grid = document.getElementById('photo-grid');
     for (const ph of photos) {
-      const { data: urlData } = sb.storage.from('media').getPublicUrl(ph.storage_path);
-      addPhotoThumb(urlData.publicUrl, ph.sequence_number, null, true, ph.filename);
+      const { data: urlData, error: urlErr } = await sb.storage.from('media').createSignedUrl(ph.storage_path, 3600);
+      if (urlErr || !urlData?.signedUrl) continue;
+      addPhotoThumb(urlData.signedUrl, ph.sequence_number, null, true, ph.filename);
     }
   }
 }

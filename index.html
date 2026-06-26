@@ -203,8 +203,8 @@
   .card-meta { font-size: .78rem; color: var(--accent-dim); margin-top: 4px; }
   .card-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
   /* Active site card */
-  .card.site-active { border-color: var(--accent); background: #FFF8F0; }
-  .site-check { color: var(--accent); font-size: 1.2rem; font-weight: 900; flex-shrink: 0; margin-top: 2px; }
+  .card.site-active { border: 2.5px solid var(--primary); background: #FFF8F0; box-shadow: 0 2px 8px rgba(74,55,40,.15); }
+  .site-edit-btn { font-size: .75rem; padding: 4px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--card); color: var(--primary); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
 
   /* ── SECTION HEADERS ── */
   .section-header {
@@ -669,29 +669,27 @@
           <span class="section-chevron" id="chevron-condition">›</span>
         </div>
         <div class="section-body" id="body-condition">
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Bone Missing %</label>
-              <select id="occ-bone-missing" class="form-select">
-                <option value="">—</option>
-                <option>0%</option><option>5%</option><option>10%</option><option>15%</option><option>20%</option>
-                <option>25%</option><option>30%</option><option>35%</option><option>40%</option><option>45%</option>
-                <option>50%</option><option>55%</option><option>60%</option><option>65%</option><option>70%</option>
-                <option>75%</option><option>80%</option><option>85%</option><option>90%</option><option>95%</option>
-                <option>100%</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Pre-Depositional %</label>
-              <select id="occ-pre-dep-pct" class="form-select">
-                <option value="">—</option>
-                <option>0%</option><option>5%</option><option>10%</option><option>15%</option><option>20%</option>
-                <option>25%</option><option>30%</option><option>35%</option><option>40%</option><option>45%</option>
-                <option>50%</option><option>55%</option><option>60%</option><option>65%</option><option>70%</option>
-                <option>75%</option><option>80%</option><option>85%</option><option>90%</option><option>95%</option>
-                <option>100%</option>
-              </select>
-            </div>
+          <div class="form-group">
+            <label class="form-label">Pre-Depositional % Complete</label>
+            <select id="occ-pre-dep-pct" class="form-select">
+              <option value="">—</option>
+              <option>0%</option><option>5%</option><option>10%</option><option>15%</option><option>20%</option>
+              <option>25%</option><option>30%</option><option>35%</option><option>40%</option><option>45%</option>
+              <option>50%</option><option>55%</option><option>60%</option><option>65%</option><option>70%</option>
+              <option>75%</option><option>80%</option><option>85%</option><option>90%</option><option>95%</option>
+              <option>100%</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-top:12px;">
+            <label class="form-label">% Lost During Excavation</label>
+            <select id="occ-bone-missing" class="form-select">
+              <option value="">—</option>
+              <option>0%</option><option>5%</option><option>10%</option><option>15%</option><option>20%</option>
+              <option>25%</option><option>30%</option><option>35%</option><option>40%</option><option>45%</option>
+              <option>50%</option><option>55%</option><option>60%</option><option>65%</option><option>70%</option>
+              <option>75%</option><option>80%</option><option>85%</option><option>90%</option><option>95%</option>
+              <option>100%</option>
+            </select>
           </div>
           <div class="form-group" style="margin-top:12px;">
             <label class="form-label">Pre-Depositional Condition</label>
@@ -1404,14 +1402,8 @@ function renderSitesList() {
           <div class="card-sub">${loc.site_name || ''}</div>
           <div class="card-meta">${loc.verbatim_locality || ''}</div>
         </div>
-        ${isActive
-          ? `<span class="site-check">✓</span>`
-          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;margin-top:3px;"><polyline points="9 18 15 12 9 6"/></svg>`
-        }
+        ${isActive ? `<button class="site-edit-btn" onclick="event.stopPropagation();openLocationForm('${loc.id}')">Edit</button>` : ''}
       </div>
-      ${isActive ? `<div style="margin-top:8px;">
-        <button class="btn btn-ghost btn-sm" style="font-size:.78rem;" onclick="event.stopPropagation();openLocationForm('${loc.id}')">Edit Site</button>
-      </div>` : ''}
     </div>`;
   }).join('');
 }

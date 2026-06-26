@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wdc-field-v10';
+const CACHE_NAME = 'wdc-field-v12';
 
 self.addEventListener('install', event => {
   event.waitUntil(

@@ -493,6 +493,28 @@
         <textarea id="loc-remarks" class="form-textarea" placeholder="Additional notes about this site..."></textarea>
       </div>
 
+      <div class="form-row" style="margin-top:12px;">
+        <div class="form-group">
+          <label class="form-label">Formation</label>
+          <select id="loc-formation" class="form-select" onchange="onLocFormationChange()">
+            <option value="">— select —</option>
+            <option value="Morrison">Morrison</option>
+            <option value="Lance">Lance</option>
+            <option value="Hell Creek">Hell Creek</option>
+            <option value="Cloverly">Cloverly</option>
+            <option value="Frontier">Frontier</option>
+            <option value="Mowry">Mowry</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Epoch</label>
+          <select id="loc-epoch" class="form-select">
+            <option value="">— select formation —</option>
+          </select>
+        </div>
+      </div>
+
       <div class="form-group" style="margin-top:12px;">
         <label class="form-label">GPS Coordinates</label>
         <button class="btn btn-secondary btn-full" onclick="captureGPSForLocation()">
@@ -1324,16 +1346,49 @@ function onFormationChange() {
   }
 }
 
+function onLocFormationChange() {
+  const formation = document.getElementById('loc-formation').value;
+  const epochSel = document.getElementById('loc-epoch');
+  const fd = PALEO_DATA[formation];
+  if (fd) {
+    epochSel.innerHTML = '<option value="">— select —</option>' +
+      fd.epochs.map(e => `<option value="${e}">${e}</option>`).join('');
+    if (fd.epochs.length === 1) epochSel.value = fd.epochs[0];
+  } else {
+    epochSel.innerHTML = '<option value="">— select formation —</option>';
+  }
+}
+
+// Build the scientific name select — site's known taxa at top, full formation list below
+function buildTaxonOptions(formation, epoch, siteTaxa) {
+  const allTaxa = PALEO_DATA[formation]?.[epoch] || [];
+  const sel = document.getElementById('occ-scientific-name');
+  const cur = sel.value;
+  const siteKnown = (siteTaxa || []).filter(t => t && t !== 'Indeterminate' && t !== 'Other');
+
+  let html = '<option value="">— select —</option>';
+  if (siteKnown.length > 0) {
+    html += `<optgroup label="Previously found at this site">` +
+      siteKnown.map(t => `<option value="${t}">${t}</option>`).join('') +
+      `</optgroup>`;
+  }
+  if (allTaxa.length > 0) {
+    const label = formation ? `All ${formation} taxa` : 'All taxa';
+    html += `<optgroup label="${label}">` +
+      allTaxa.map(t => `<option value="${t}">${t}</option>`).join('') +
+      `</optgroup>`;
+  }
+  sel.innerHTML = html;
+  // Restore prior selection if still present
+  if (cur && Array.from(sel.options).some(o => o.value === cur)) sel.value = cur;
+  document.getElementById('occ-taxon-other').style.display = 'none';
+}
+
 function onEpochChange() {
   const formation = document.getElementById('occ-formation').value;
   const epoch = document.getElementById('occ-epoch').value;
-  const taxa = PALEO_DATA[formation]?.[epoch] || [];
-  const sel = document.getElementById('occ-scientific-name');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— select —</option>' +
-    taxa.map(t => `<option value="${t}">${t}</option>`).join('');
-  if (taxa.includes(cur)) sel.value = cur;
-  document.getElementById('occ-taxon-other').style.display = 'none';
+  const activeLoc = locationsCache.find(l => l.id === activeSiteId);
+  buildTaxonOptions(formation, epoch, activeLoc?.associated_taxa || []);
 }
 
 function resetTaxaSelect() {
@@ -1495,6 +1550,8 @@ function openLocationForm(locId) {
     document.getElementById('loc-m1-label').value = '';
     document.getElementById('loc-m2-label').value = '';
     document.getElementById('loc-remarks').value = '';
+    document.getElementById('loc-formation').value = '';
+    document.getElementById('loc-epoch').innerHTML = '<option value="">— select formation —</option>';
   } else {
     const loc = locationsCache.find(l => l.id === locId);
     if (loc) {
@@ -1504,6 +1561,11 @@ function openLocationForm(locId) {
       document.getElementById('loc-m1-label').value = loc.marker_1_label || '';
       document.getElementById('loc-m2-label').value = loc.marker_2_label || '';
       document.getElementById('loc-remarks').value = loc.location_remarks || '';
+      document.getElementById('loc-formation').value = loc.formation || '';
+      if (loc.formation) {
+        onLocFormationChange();
+        if (loc.epoch) document.getElementById('loc-epoch').value = loc.epoch;
+      }
       if (loc.decimal_latitude && loc.decimal_longitude) {
         currentLocationGPS = { lat: loc.decimal_latitude, lng: loc.decimal_longitude };
         showLocationGPS(currentLocationGPS);
@@ -1546,6 +1608,8 @@ async function saveLocation() {
     marker_1_label: document.getElementById('loc-m1-label').value.trim() || null,
     marker_2_label: document.getElementById('loc-m2-label').value.trim() || null,
     location_remarks: document.getElementById('loc-remarks').value.trim() || null,
+    formation: document.getElementById('loc-formation').value || null,
+    epoch: document.getElementById('loc-epoch').value || null,
     decimal_latitude: currentLocationGPS?.lat || null,
     decimal_longitude: currentLocationGPS?.lng || null,
     created_by: currentUser.id
@@ -1700,9 +1764,20 @@ function openOccurrenceForm(occurrenceId) {
     document.getElementById('occ-verbatim-element').value = '';
     document.getElementById('occ-element-other').value = '';
     document.getElementById('occ-element-other').style.display = 'none';
-    document.getElementById('occ-formation').value = '';
-    document.getElementById('occ-epoch').innerHTML = '<option value="">— select formation —</option>';
-    resetTaxaSelect();
+    // Prefill geologic context from active site
+    const activeLoc = locationsCache.find(l => l.id === activeSiteId);
+    if (activeLoc?.formation) {
+      document.getElementById('occ-formation').value = activeLoc.formation;
+      onFormationChange();
+      if (activeLoc.epoch) {
+        document.getElementById('occ-epoch').value = activeLoc.epoch;
+        onEpochChange(); // also loads site taxa into top of list
+      }
+    } else {
+      document.getElementById('occ-formation').value = '';
+      document.getElementById('occ-epoch').innerHTML = '<option value="">— select formation —</option>';
+      resetTaxaSelect();
+    }
     document.getElementById('occ-side-l').checked = false;
     document.getElementById('occ-side-r').checked = false;
     document.getElementById('occ-element-remarks').value = '';
@@ -2245,6 +2320,19 @@ async function saveOccurrence() {
   if (pendingPhotos.length > 0) {
     await uploadPendingPhotos(occId, catalogNumber);
     pendingPhotos = [];
+  }
+
+  // Update site's associated_taxa if this taxon is new to the site
+  const sciName = data.scientific_name;
+  if (sciName && sciName !== 'Indeterminate' && sciName !== 'Other' && locationId) {
+    const site = locationsCache.find(l => l.id === locationId);
+    if (site && !(site.associated_taxa || []).includes(sciName)) {
+      const newTaxa = [...(site.associated_taxa || []), sciName];
+      site.associated_taxa = newTaxa; // update local cache immediately
+      if (navigator.onLine) {
+        await sb.from('locations').update({ associated_taxa: newTaxa }).eq('id', locationId);
+      }
+    }
   }
 
   // Try to flush

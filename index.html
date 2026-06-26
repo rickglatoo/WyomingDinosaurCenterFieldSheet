@@ -150,6 +150,8 @@
   }
   .form-textarea { resize: vertical; min-height: 80px; }
   .form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a09080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  #occ-scientific-name option { padding: 5px 10px; font-size: .88rem; }
+  #occ-scientific-name option[disabled] { color: var(--border); font-size: .6rem; padding: 0 8px; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   .readonly-field {
@@ -647,7 +649,7 @@
         <div class="section-body" id="body-identification">
           <div class="form-group">
             <label class="form-label">Scientific Name</label>
-            <select id="occ-scientific-name" class="form-select" onchange="onTaxonChange()">
+            <select id="occ-scientific-name" class="form-select" onchange="onTaxonChange()" size="8" style="height:auto;padding:0;">
               <option value="">— select formation + epoch first —</option>
             </select>
             <input type="text" id="occ-taxon-other" class="form-input" placeholder="Enter scientific name…" style="display:none;margin-top:8px;">
@@ -1359,26 +1361,23 @@ function onLocFormationChange() {
   }
 }
 
-// Build the scientific name select — site's known taxa at top, full formation list below
+// Build the scientific name select — site's known taxa at top, separator, full list below
 function buildTaxonOptions(formation, epoch, siteTaxa) {
   const allTaxa = PALEO_DATA[formation]?.[epoch] || [];
   const sel = document.getElementById('occ-scientific-name');
   const cur = sel.value;
   const siteKnown = (siteTaxa || []).filter(t => t && t !== 'Indeterminate' && t !== 'Other');
 
-  let html = '<option value="">— select —</option>';
+  let html = '';
   if (siteKnown.length > 0) {
-    html += `<optgroup label="Previously found at this site">` +
-      siteKnown.map(t => `<option value="${t}">${t}</option>`).join('') +
-      `</optgroup>`;
+    html += siteKnown.map(t => `<option value="${t}">${t}</option>`).join('');
+    if (allTaxa.length > 0) {
+      html += `<option disabled>──────────────────</option>`;
+    }
   }
-  if (allTaxa.length > 0) {
-    const label = formation ? `All ${formation} taxa` : 'All taxa';
-    html += `<optgroup label="${label}">` +
-      allTaxa.map(t => `<option value="${t}">${t}</option>`).join('') +
-      `</optgroup>`;
-  }
-  sel.innerHTML = html;
+  html += allTaxa.map(t => `<option value="${t}">${t}</option>`).join('');
+
+  sel.innerHTML = html || '<option value="">— select formation + epoch first —</option>';
   // Restore prior selection if still present
   if (cur && Array.from(sel.options).some(o => o.value === cur)) sel.value = cur;
   document.getElementById('occ-taxon-other').style.display = 'none';
@@ -1392,8 +1391,7 @@ function onEpochChange() {
 }
 
 function resetTaxaSelect() {
-  const sel = document.getElementById('occ-scientific-name');
-  sel.innerHTML = '<option value="">— select formation + epoch first —</option>';
+  document.getElementById('occ-scientific-name').innerHTML = '<option value="" disabled selected>— select formation + epoch first —</option>';
   document.getElementById('occ-taxon-other').style.display = 'none';
 }
 

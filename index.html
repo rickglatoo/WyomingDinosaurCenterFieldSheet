@@ -20,21 +20,22 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #1a1714;
-    --surface: #252119;
-    --card: #2d2a26;
-    --card2: #353028;
+    --bg: #F5F1EC;
+    --surface: #fff;
+    --card: #fff;
+    --card2: #EDE7DF;
+    --primary: #4A3728;
     --accent: #C4A882;
     --accent-dim: #9a7f60;
-    --success: #2ECC71;
+    --success: #27AE60;
     --danger: #E74C3C;
     --warn: #F39C12;
-    --text: #e8e0d4;
-    --text-dim: #a09080;
-    --border: #3d3830;
-    --input-bg: #1e1b17;
-    --radius: 10px;
-    --radius-sm: 6px;
+    --text: #2C1810;
+    --text-dim: #8B7355;
+    --border: #DDD0C5;
+    --input-bg: #F0EBE4;
+    --radius: 12px;
+    --radius-sm: 8px;
   }
 
   html, body {
@@ -45,6 +46,7 @@
     font-size: 16px;
     -webkit-tap-highlight-color: transparent;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
   #app {
@@ -63,20 +65,19 @@
     gap: 24px; z-index: 9999;
     transition: opacity .4s;
   }
-  #splash img { width: 300px; max-width: 72vw; border-radius: 20px; filter: drop-shadow(0 8px 32px rgba(196,168,130,0.22)); }
-  #splash .splash-title { font-size: 1.3rem; color: var(--accent); letter-spacing: .1em; font-weight: 600; }
+  #splash img { width: 260px; max-width: 72vw; border-radius: 20px; filter: drop-shadow(0 4px 16px rgba(74,55,40,0.18)); }
+  #splash .splash-title { font-size: 1.3rem; color: var(--primary); letter-spacing: .1em; font-weight: 700; }
   #splash .splash-sub { font-size: .85rem; color: var(--text-dim); }
 
   /* ── HEADER ── */
   #header {
     display: flex; align-items: center; gap: 8px;
     padding: 10px 16px 8px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    background: var(--primary);
     flex-shrink: 0;
     min-height: 52px;
   }
-  #header-title { font-size: 1.1rem; font-weight: 700; color: var(--accent); flex: 1; }
+  #header-title { font-size: 1.1rem; font-weight: 700; color: #fff; flex: 1; }
   #online-badge {
     width: 10px; height: 10px; border-radius: 50%;
     background: var(--danger); flex-shrink: 0;
@@ -84,7 +85,7 @@
   }
   #online-badge.online { background: var(--success); }
   #online-badge.pending { background: var(--warn); }
-  #header-user { font-size: .78rem; color: var(--text-dim); max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #header-user { font-size: .78rem; color: rgba(255,255,255,0.65); max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* ── MAIN CONTENT ── */
   #main-content {
@@ -94,17 +95,6 @@
     -webkit-overflow-scrolling: touch;
     position: relative;
   }
-  /* Subtle watermark on all main views */
-  #main-content::before {
-    content: '';
-    position: fixed;
-    bottom: 80px; right: 16px;
-    width: min(38vw, 160px); height: min(38vw, 160px);
-    background: url('WDC_fieldApp.png') center / contain no-repeat;
-    opacity: 0.04;
-    pointer-events: none;
-    z-index: 0;
-  }
 
   /* ── BOTTOM NAV ── */
   #bottom-nav {
@@ -112,17 +102,18 @@
     background: var(--surface);
     border-top: 1px solid var(--border);
     flex-shrink: 0;
+    box-shadow: 0 -1px 8px rgba(0,0,0,.06);
   }
   .nav-tab {
     flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 8px 4px 10px;
     border: none; background: none; color: var(--text-dim);
-    font-size: .7rem; font-weight: 500; gap: 3px;
+    font-size: .7rem; font-weight: 600; gap: 3px;
     cursor: pointer; transition: color .2s;
     min-height: 56px;
   }
   .nav-tab svg { width: 22px; height: 22px; }
-  .nav-tab.active { color: var(--accent); }
+  .nav-tab.active { color: var(--primary); }
 
   /* ── VIEWS ── */
   .view { display: none; padding: 16px; padding-bottom: 80px; min-height: 100%; }
@@ -132,28 +123,16 @@
   #login-view {
     display: none; flex-direction: column; align-items: center; justify-content: center;
     min-height: 100vh; padding: 24px; gap: 20px;
-    position: relative; overflow: hidden;
+    background: var(--bg);
   }
   #login-view.active { display: flex; }
-  /* Watermark behind login form */
-  #login-view::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(85vw, 420px); height: min(85vw, 420px);
-    background: url('WDC_fieldApp.png') center / contain no-repeat;
-    opacity: 0.055;
-    pointer-events: none;
-  }
-  #login-view > * { position: relative; z-index: 1; }
   .login-logo {
     width: 200px; max-width: 55vw;
     border-radius: 16px;
     margin-bottom: 4px;
-    filter: drop-shadow(0 4px 24px rgba(196,168,130,0.18));
+    filter: drop-shadow(0 4px 16px rgba(74,55,40,0.18));
   }
-  .login-title { font-size: 1.5rem; font-weight: 700; color: var(--accent); letter-spacing: .05em; }
+  .login-title { font-size: 1.5rem; font-weight: 700; color: var(--primary); letter-spacing: .02em; }
   .login-sub { font-size: .85rem; color: var(--text-dim); margin-bottom: 8px; }
   .login-form { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 12px; }
 
@@ -189,10 +168,10 @@
     min-height: 44px; -webkit-appearance: none;
   }
   .btn:active { opacity: .8; transform: scale(.98); }
-  .btn-primary { background: var(--accent); color: #1a1714; }
+  .btn-primary { background: var(--primary); color: #fff; }
   .btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
   .btn-danger { background: var(--danger); color: #fff; }
-  .btn-ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .btn-ghost { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
   .btn-sm { padding: 8px 14px; font-size: .85rem; min-height: 36px; }
   .btn-full { width: 100%; }
   .btn-icon { padding: 10px; min-height: 44px; min-width: 44px; }
@@ -202,7 +181,7 @@
   #fab {
     position: fixed; bottom: 74px; right: 20px;
     width: 56px; height: 56px; border-radius: 50%;
-    background: var(--accent); color: #1a1714;
+    background: var(--primary); color: #fff;
     border: none; cursor: pointer; font-size: 1.8rem; font-weight: 300;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 4px 16px rgba(0,0,0,.5);
@@ -217,12 +196,16 @@
     background: var(--card); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
     cursor: pointer; transition: border-color .15s;
+    box-shadow: 0 1px 5px rgba(0,0,0,.06);
   }
   .card:active { border-color: var(--accent); }
-  .card-title { font-size: 1rem; font-weight: 600; color: var(--text); }
+  .card-title { font-size: 1rem; font-weight: 700; color: var(--text); }
   .card-sub { font-size: .82rem; color: var(--text-dim); margin-top: 3px; }
   .card-meta { font-size: .78rem; color: var(--accent-dim); margin-top: 4px; }
   .card-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  /* Active site card */
+  .card.site-active { border-color: var(--accent); background: #FFF8F0; }
+  .site-check { color: var(--accent); font-size: 1.2rem; font-weight: 900; flex-shrink: 0; margin-top: 2px; }
 
   /* ── SECTION HEADERS ── */
   .section-header {
@@ -230,7 +213,7 @@
     padding: 14px 0 8px; margin-top: 4px;
     cursor: pointer; user-select: none;
   }
-  .section-title { font-size: .8rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .08em; }
+  .section-title { font-size: .8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: .08em; }
   .section-chevron { color: var(--text-dim); transition: transform .25s; font-size: 1rem; }
   .section-chevron.open { transform: rotate(90deg); }
   .section-body { display: none; }
@@ -245,7 +228,7 @@
     cursor: pointer; transition: all .15s; white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
   }
-  .chip.selected { background: var(--accent); color: #1a1714; border-color: var(--accent); }
+  .chip.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
 
   /* ── TOGGLE SELECTOR (Yes/No/Unknown) ── */
   .toggle-group { display: flex; gap: 0; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); }
@@ -255,7 +238,7 @@
     transition: all .15s; border-right: 1px solid var(--border);
   }
   .toggle-opt:last-child { border-right: none; }
-  .toggle-opt.selected { background: var(--accent); color: #1a1714; }
+  .toggle-opt.selected { background: var(--primary); color: #fff; }
 
   /* ── CHECKBOX ── */
   .check-group { display: flex; gap: 16px; }
@@ -307,11 +290,14 @@
   .badge-admin { background: rgba(231,76,60,.2); color: var(--danger); }
   .badge-manager { background: rgba(196,168,130,.2); color: var(--accent); }
   .badge-collector { background: rgba(46,204,113,.15); color: var(--success); }
-  .page-title { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+  .page-title { font-size: 1.2rem; font-weight: 800; color: var(--primary); margin-bottom: 16px; }
+  /* ── SITES WATERMARK ── */
+  #sites-watermark { display: flex; justify-content: center; padding: 8px 0 16px; pointer-events: none; }
+  #sites-watermark img { width: 240px; height: 240px; opacity: 0.07; border-radius: 16px; }
   .sub-title { font-size: .85rem; color: var(--text-dim); margin-bottom: 14px; }
   .back-btn {
     display: flex; align-items: center; gap: 6px;
-    background: none; border: none; color: var(--accent); font-size: .9rem;
+    background: none; border: none; color: var(--primary); font-size: .9rem;
     padding: 6px 0; cursor: pointer; margin-bottom: 14px; font-family: inherit;
   }
   .back-btn svg { width: 16px; height: 16px; }
@@ -342,7 +328,7 @@
     background: var(--card2); border-radius: var(--radius-sm); padding: 10px 12px;
     font-size: .82rem;
   }
-  .custody-item .event-type { color: var(--accent); font-weight: 700; text-transform: uppercase; font-size: .75rem; letter-spacing: .06em; }
+  .custody-item .event-type { color: var(--primary); font-weight: 700; text-transform: uppercase; font-size: .75rem; letter-spacing: .06em; }
   .custody-item .event-meta { color: var(--text-dim); margin-top: 2px; }
   .settings-section { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
   .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
@@ -408,17 +394,13 @@
     <!-- SITES VIEW -->
     <div id="view-sites" class="view active">
       <div class="page-title">Field Sites</div>
+      <div id="sites-watermark"><img src="WDC_fieldApp.png" alt=""></div>
       <div id="sites-list"></div>
     </div>
 
     <!-- SPECIMENS VIEW -->
     <div id="view-specimens" class="view">
-      <div class="page-title">Specimens</div>
-      <div class="filter-bar">
-        <select id="filter-location" class="form-select" onchange="loadOccurrences()">
-          <option value="">All Sites</option>
-        </select>
-      </div>
+      <div class="page-title" id="specimens-page-title">Specimens</div>
       <div id="specimens-list"></div>
     </div>
 
@@ -929,6 +911,7 @@ let currentUser = null;
 let currentProfile = null;
 let currentTab = 'sites';
 let locationsCache = [];
+let activeSiteId = null;
 let editingLocationId = null;
 let editingOccurrenceId = null;
 let currentLocationGPS = null;
@@ -1222,8 +1205,16 @@ function getChips(containerId) {
 async function loadLocationsCache() {
   const { data } = await sb.from('locations').select('*').order('site_code');
   locationsCache = data || [];
+  // Restore active site from localStorage, validate it still exists
+  const saved = localStorage.getItem('wdc_active_site');
+  activeSiteId = (saved && locationsCache.find(l => l.id === saved)) ? saved : null;
+  if (!activeSiteId) localStorage.removeItem('wdc_active_site');
   renderSitesList();
   populateLocationDropdowns();
+  // Update specimens title if a site is active
+  const site = locationsCache.find(l => l.id === activeSiteId);
+  const title = document.getElementById('specimens-page-title');
+  if (title) title.textContent = site ? `Specimens — ${site.site_code}` : 'Specimens';
 }
 
 function renderSitesList() {
@@ -1232,32 +1223,44 @@ function renderSitesList() {
     container.innerHTML = '<div class="empty-state"><div class="empty-icon">🗺️</div><p>No sites yet. Tap + to add the first field site.</p></div>';
     return;
   }
-  container.innerHTML = locationsCache.map(loc => `
-    <div class="card" onclick="openLocationForm('${loc.id}')">
+  container.innerHTML = locationsCache.map(loc => {
+    const isActive = loc.id === activeSiteId;
+    return `
+    <div class="card${isActive ? ' site-active' : ''}" onclick="selectSite('${loc.id}')">
       <div class="card-row">
-        <div>
+        <div style="flex:1;min-width:0;">
           <div class="card-title">${loc.site_code}</div>
           <div class="card-sub">${loc.site_name || ''}</div>
           <div class="card-meta">${loc.verbatim_locality || ''}</div>
         </div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;margin-top:3px;"><polyline points="9 18 15 12 9 6"/></svg>
+        ${isActive
+          ? `<span class="site-check">✓</span>`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;margin-top:3px;"><polyline points="9 18 15 12 9 6"/></svg>`
+        }
       </div>
-    </div>
-  `).join('');
+      ${isActive ? `<div style="margin-top:8px;"><button class="btn btn-ghost btn-sm" style="font-size:.78rem;" onclick="event.stopPropagation();openLocationForm('${loc.id}')">Edit Site</button></div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function selectSite(id) {
+  activeSiteId = (activeSiteId === id) ? null : id; // tap again to deselect
+  localStorage.setItem('wdc_active_site', activeSiteId || '');
+  renderSitesList();
+  // Update specimens title
+  const site = locationsCache.find(l => l.id === activeSiteId);
+  const title = document.getElementById('specimens-page-title');
+  if (title) title.textContent = site ? `Specimens — ${site.site_code}` : 'Specimens';
 }
 
 function populateLocationDropdowns() {
-  const selectors = ['occ-location-id', 'filter-location'];
-  selectors.forEach(id => {
-    const sel = document.getElementById(id);
-    if (!sel) return;
-    const current = sel.value;
-    const firstOpt = id === 'filter-location' ? '<option value="">All Sites</option>' : '<option value="">— select site —</option>';
-    sel.innerHTML = firstOpt + locationsCache.map(l =>
-      `<option value="${l.id}">${l.site_code}${l.site_name ? ' — '+l.site_name : ''}</option>`
-    ).join('');
-    if (current) sel.value = current;
-  });
+  const sel = document.getElementById('occ-location-id');
+  if (!sel) return;
+  const current = sel.value || activeSiteId;
+  sel.innerHTML = '<option value="">— select site —</option>' + locationsCache.map(l =>
+    `<option value="${l.id}">${l.site_code}${l.site_name ? ' — '+l.site_name : ''}</option>`
+  ).join('');
+  if (current) sel.value = current;
 }
 
 function openLocationForm(locId) {
@@ -1356,10 +1359,13 @@ async function saveLocation() {
 // ════════════════════════════════════════════════════════════
 async function loadOccurrences() {
   const container = document.getElementById('specimens-list');
+  if (!activeSiteId) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🗺️</div><p>Select a site on the Sites tab first.</p></div>';
+    return;
+  }
   container.innerHTML = '<div class="empty-state"><div class="spinner"></div></div>';
-  const locFilter = document.getElementById('filter-location')?.value;
   let query = sb.from('occurrences').select('*, locations(site_code, site_name)').order('created_at', { ascending: false }).limit(100);
-  if (locFilter) query = query.eq('location_id', locFilter);
+  query = query.eq('location_id', activeSiteId);
   const { data, error } = await query;
   if (error) { container.innerHTML = `<div class="error-msg">Error loading specimens: ${error.message}</div>`; return; }
   const items = data || [];

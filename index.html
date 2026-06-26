@@ -1788,10 +1788,8 @@ function openOccurrenceForm(occurrenceId) {
     document.getElementById('occ-max-length').value = '';
     document.getElementById('occ-mid-width').value = '';
     document.getElementById('occ-litho').value = '';
-    document.getElementById('occ-formation').value = '';
     document.getElementById('occ-member').value = '';
     document.getElementById('occ-bed').value = '';
-    document.getElementById('occ-epoch').value = '';
     document.getElementById('occ-associated').value = '';
     document.getElementById('occ-remarks').value = '';
     document.getElementById('occ-date-mapped').value = '';
@@ -1809,7 +1807,6 @@ function openOccurrenceForm(occurrenceId) {
     document.getElementById('occ-verbatim-coords').value = '';
     // Set site from active selection and auto-generate catalog number
     document.getElementById('occ-location-id').value = activeSiteId || '';
-    const activeLoc = locationsCache.find(l => l.id === activeSiteId);
     document.getElementById('occ-site-display').textContent = activeLoc ? `${activeLoc.site_code}${activeLoc.site_name ? ' — '+activeLoc.site_name : ''}` : '—';
     if (activeSiteId) {
       document.getElementById('occ-catalog-display').textContent = 'Generating…';

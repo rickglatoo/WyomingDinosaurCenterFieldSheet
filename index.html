@@ -649,7 +649,7 @@
         <div class="section-body" id="body-identification">
           <div class="form-group">
             <label class="form-label">Scientific Name</label>
-            <select id="occ-scientific-name" class="form-select" onchange="onTaxonChange()" size="8" style="height:auto;padding:0;">
+            <select id="occ-scientific-name" class="form-select" onchange="onTaxonChange()">
               <option value="">— select formation + epoch first —</option>
             </select>
             <input type="text" id="occ-taxon-other" class="form-input" placeholder="Enter scientific name…" style="display:none;margin-top:8px;">
@@ -1372,7 +1372,7 @@ function buildTaxonOptions(formation, epoch, siteTaxa) {
   if (siteKnown.length > 0) {
     html += siteKnown.map(t => `<option value="${t}">${t}</option>`).join('');
     if (allTaxa.length > 0) {
-      html += `<option disabled>──────────────────</option>`;
+      html += `<option disabled>─────────</option>`;
     }
   }
   html += allTaxa.map(t => `<option value="${t}">${t}</option>`).join('');

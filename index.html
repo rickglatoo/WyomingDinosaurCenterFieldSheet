@@ -1674,9 +1674,9 @@ function renderOccurrenceCards(items) {
     <div class="card" onclick="openOccurrenceForm('${occ.id}')">
       <div class="card-row">
         <div style="flex:1;min-width:0;">
-          <div class="card-title">${occ.catalog_number || '—'}</div>
+          <div class="card-title">${occ.catalogNumber || '—'}</div>
           <div class="card-sub">${occ.scientific_name || 'Unidentified'} ${occ.verbatim_element ? '· '+occ.verbatim_element : ''}</div>
-          <div class="card-meta">${fmtDate(occ.event_date)}${occ.locations ? ' · '+occ.locations.site_code : ''}</div>
+          <div class="card-meta">${fmtDate(occ.eventDate)}${occ.locations ? ' · '+occ.locations.site_code : ''}</div>
         </div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;margin-top:3px;"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -1695,14 +1695,14 @@ async function generateCatalogNumber(locationId) {
   const prefix = `${siteCode}-${year}-`;
 
   const { data } = await sb.from('occurrences')
-    .select('catalog_number')
+    .select('catalogNumber')
     .eq('location_id', locationId)
-    .like('catalog_number', `${prefix}%`);
+    .like('catalogNumber', `${prefix}%`);
 
   let maxNum = 0;
   (data || []).forEach(row => {
-    if (row.catalog_number) {
-      const parts = row.catalog_number.split('-');
+    if (row.catalogNumber) {
+      const parts = row.catalogNumber.split('-');
       const num = parseInt(parts[parts.length - 1], 10);
       if (!isNaN(num) && num > maxNum) maxNum = num;
     }
@@ -1711,8 +1711,8 @@ async function generateCatalogNumber(locationId) {
   // Also check local queue
   const q = getQueue();
   q.forEach(item => {
-    if (item.table === 'occurrences' && item.data.catalog_number && item.data.catalog_number.startsWith(prefix)) {
-      const parts = item.data.catalog_number.split('-');
+    if (item.table === 'occurrences' && item.data.catalogNumber && item.data.catalogNumber.startsWith(prefix)) {
+      const parts = item.data.catalogNumber.split('-');
       const num = parseInt(parts[parts.length - 1], 10);
       if (!isNaN(num) && num > maxNum) maxNum = num;
     }
@@ -1841,14 +1841,14 @@ async function loadOccurrenceIntoForm(occId) {
 }
 
 async function populateOccurrenceForm(occ) {
-  document.getElementById('occ-form-title').textContent = occ.catalog_number || 'Edit Specimen';
-  document.getElementById('occ-catalog-display').textContent = occ.catalog_number || '—';
-  document.getElementById('occ-catalog-number').value = occ.catalog_number || '';
+  document.getElementById('occ-form-title').textContent = occ.catalogNumber || 'Edit Specimen';
+  document.getElementById('occ-catalog-display').textContent = occ.catalogNumber || '—';
+  document.getElementById('occ-catalog-number').value = occ.catalogNumber || '';
   document.getElementById('occ-location-id').value = occ.location_id || '';
   const occLoc = occ.locations || locationsCache.find(l => l.id === occ.location_id);
   document.getElementById('occ-site-display').textContent = occLoc ? `${occLoc.site_code}${occLoc.site_name ? ' — '+occLoc.site_name : ''}` : '—';
-  document.getElementById('occ-event-date').value = occ.event_date || '';
-  document.getElementById('occ-recorded-by').value = occ.recorded_by || '';
+  document.getElementById('occ-event-date').value = occ.eventDate || '';
+  document.getElementById('occ-recorded-by').value = occ.recordedBy || '';
   document.getElementById('occ-intern-staff').value = occ.intern_staff || '';
   // Restore formation → epoch → taxa chain first
   const formSel = document.getElementById('occ-formation');
@@ -2238,10 +2238,10 @@ async function saveOccurrence() {
     institution_code: 'WDC',
     collection_code: 'PALEO',
     basis_of_record: 'FossilSpecimen',
-    catalog_number: catalogNumber,
+    catalogNumber: catalogNumber,
     location_id: locationId,
-    event_date: document.getElementById('occ-event-date').value || null,
-    recorded_by: document.getElementById('occ-recorded-by').value.trim() || null,
+    eventDate: document.getElementById('occ-event-date').value || null,
+    recordedBy: document.getElementById('occ-recorded-by').value.trim() || null,
     intern_staff: document.getElementById('occ-intern-staff').value.trim() || null,
     scientific_name: (() => { const s = document.getElementById('occ-scientific-name').value; return s === 'Other' ? (document.getElementById('occ-taxon-other').value.trim() || null) : (s || null); })(),
     verbatim_element: (() => { const s = document.getElementById('occ-verbatim-element').value; return s === 'Other' ? (document.getElementById('occ-element-other').value.trim() || null) : (s || null); })(),
@@ -2298,7 +2298,7 @@ async function saveOccurrence() {
       id: genUUID(),
       occurrence_id: occId,
       event_type: 'collected',
-      handler: data.recorded_by || currentProfile?.full_name,
+      handler: data.recordedBy || currentProfile?.full_name,
       location: locationsCache.find(l => l.id === locationId)?.site_code || '',
       condition: data.current_condition?.join(', ') || '',
       notes: 'Initial collection',

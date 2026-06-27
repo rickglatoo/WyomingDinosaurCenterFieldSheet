@@ -3,7 +3,7 @@
 -- Darwin Core aligned + PaleoContext + custom field extensions
 --
 -- Naming convention:
---   [DwC]      = standard Darwin Core term (snake_case of camelCase term)
+--   [DwC]      = standard Darwin Core term (camelCase; quoted in SQL for case-sensitivity)
 --   [PaleoCtx] = Darwin Core PaleoContext extension
 --   [WDC]      = WDC custom field, no DwC equivalent
 --
@@ -107,13 +107,13 @@ create table occurrences (
   -- [DwC]
   institution_code        text not null default 'WDC',  -- institutionCode
   collection_code         text default 'FIELD',         -- collectionCode
-  catalog_number          text not null,                -- catalogNumber e.g. "DDD-2026-002"
+  "catalogNumber"          text not null,                -- Darwin Core: catalogNumber e.g. "DDD-2026-002"
   basis_of_record         text not null default 'FossilSpecimen', -- basisOfRecord
 
   -- ── DwC Occurrence ────────────────────────────────────────
   -- [DwC]
   occurrence_id           text,                         -- occurrenceID (external ref if needed)
-  recorded_by             text,                         -- recordedBy: collector name(s)
+  "recordedBy"             text,                         -- Darwin Core: recordedBy
   occurrence_status       text default 'present',       -- occurrenceStatus
   occurrence_remarks      text,                         -- occurrenceRemarks
   associated_occurrences  text,                         -- associatedOccurrences: nearby specimens
@@ -123,7 +123,7 @@ create table occurrences (
 
   -- ── DwC Event ─────────────────────────────────────────────
   -- [DwC]
-  event_date              date,                         -- eventDate: date discovered
+  "eventDate"              date,                         -- Darwin Core: eventDate
   event_remarks           text,                         -- eventRemarks
 
   -- ── DwC Location ─────────────────────────────────────────
@@ -331,3 +331,11 @@ create policy "Managers delete from media bucket"
 --
 --    update profiles set role = 'admin'
 --    where email = 'your@email.com';
+
+-- ════════════════════════════════════════════════════════════
+-- MIGRATION  (run on existing databases only)
+-- Renames snake_case columns to Darwin Core camelCase
+-- ════════════════════════════════════════════════════════════
+-- alter table occurrences rename column catalog_number to "catalogNumber";
+-- alter table occurrences rename column event_date     to "eventDate";
+-- alter table occurrences rename column recorded_by    to "recordedBy";
